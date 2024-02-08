@@ -2,25 +2,25 @@
 <extension key="casereminder" type="module">
   <file>casereminder</file>
   <name>casereminder</name>
-  <description>FIXME</description>
+  <description>CiviCRM: Case Reminders</description>
   <license>GPL-3.0</license>
   <maintainer>
     <author>Allen Shaw</author>
     <email>allen@JoineryHQ.com</email>
   </maintainer>
   <urls>
-    <url desc="Main Extension Page">http://FIXME</url>
-    <url desc="Documentation">http://FIXME</url>
-    <url desc="Support">http://FIXME</url>
+    <url desc="Main Extension Page">https://github.com/twomice/civicrm-casereminder</url>
+    <url desc="Documentation">https://github.com/twomice/civicrm-casereminder</url>
+    <url desc="Support">https://github.com/twomice/civicrm-casereminder/issues</url>
     <url desc="Licensing">http://www.gnu.org/licenses/gpl-3.0.html</url>
   </urls>
   <releaseDate>2024-02-08</releaseDate>
-  <version>1.0</version>
+  <version>0.1</version>
   <develStage>alpha</develStage>
   <compatibility>
     <ver>5.65</ver>
   </compatibility>
-  <comments>This is a new, undeveloped module</comments>
+  <comments>Developed by Joinery for the CiviCRM community.</comments>
   <classloader>
     <psr0 prefix="CRM_" path="."/>
     <psr4 prefix="Civi\" path="Civi"/>
