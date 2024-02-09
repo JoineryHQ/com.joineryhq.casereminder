@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Casereminder</base>
+  <class>CaseReminderType</class>
+  <name>civicrm_case_reminder_type</name>
+  <comment>Case Reminder configurations per reminder type</comment>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique CaseReminderType ID</comment>
+    <html>
+      <type>Number</type>
+    </html>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>case_type_id</name>
+    <type>int unsigned</type>
+    <comment>FK to Case Type</comment>
+  </field>
+  <foreignKey>
+    <name>case_type_id</name>
+    <table>civicrm_case_type</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>case_status_id</name>
+    <type>varchar</type>
+    <length>256</length>
+    <comment>Case status ID(s), multi-value delimited. Implicit FK to civicrm_option_value where option_group = case_status.</comment>
+  </field>
+
+  <field>
+    <name>msg_template_id</name>
+    <type>int unsigned</type>
+    <comment>FK to civicrm_msg_template</comment>
+  </field>
+  <foreignKey>
+    <name>msg_template_id</name>
+    <table>civicrm_msg_template</table>
+    <key>id</key>
+    <onDelete>SET NULL</onDelete>
+  </foreignKey>
+	
+  <field>
+    <name>recipient_relationship_type_id</name>
+    <type>varchar</type>
+    <length>256</length>
+    <comment>Relationship type ID(s) for recipients, multi-value delimited. Implicit FK to civicrm_relationship_type. -1 is Case Contact.</comment>
+  </field>    
+  
+  <field>
+    <name>from_email_address_id</name>
+    <type>int unsigned</type>
+    <comment>Implicit FK to civicrm_option_value where option_group = from_email_address</comment>
+  </field>
+  
+  <field>
+    <name>subject</name>
+    <type>varchar</type>
+    <length>128</length>
+    <comment>Subject of reminder email</comment>
+  </field>
+  
+  <field>
+    <name>max_iterations</name>
+    <type>int unsigned</type>
+    <comment>Maximum number of times to send a reminder of this type on any given case.</comment>
+  </field>
+  
+  <field>
+    <name>is_active</name>
+    <type>boolean</type>
+    <comment>Is this reminder type active?</comment>
+  </field>
+</table> 
+
