@@ -165,8 +165,17 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
         'id' => $this->_id,
       ));
       $defaultValues = $result;
-      return $defaultValues;
     }
+    else if (!$this->_id && (($this->_action & CRM_Core_Action::ADD))) {
+      $defaultValues = [
+        'is_active' => 1,
+      ];
+      $fromAddresses = CRM_Core_OptionGroup::values('from_email_address');
+      $defaultFromAddressKey = CRM_Core_OptionGroup::getDefaultValue('from_email_address');
+      $defaultValues['from_email_address'] = $fromAddresses[$defaultFromAddressKey];
+    }
+
+    return $defaultValues;
   }
 
   public function postProcess() {
