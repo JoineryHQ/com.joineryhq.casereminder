@@ -164,16 +164,19 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
         'id' => $this->_id,
       ));
       $defaultValues = $result;
+      // Unpack multi-value packed values.
+      $defaultValues['case_status_id'] = array_fill_keys(CRM_Utils_Array::explodePadded($defaultValues['case_status_id']), 1);      
+      $defaultValues['recipient_relationship_type_id'] = array_fill_keys(CRM_Utils_Array::explodePadded($defaultValues['recipient_relationship_type_id']), 1);
+      
     }
     else if (!$this->_id && (($this->_action & CRM_Core_Action::ADD))) {
-      $defaultValues = [
-        'is_active' => 1,
-      ];
       $fromAddresses = CRM_Core_OptionGroup::values('from_email_address');
       $defaultFromAddressKey = CRM_Core_OptionGroup::getDefaultValue('from_email_address');
-      $defaultValues['from_email_address'] = $fromAddresses[$defaultFromAddressKey];
+      $defaultValues = [
+        'from_email_address' => $fromAddresses[$defaultFromAddressKey],
+        'is_active' => 1,          
+      ];
     }
-
     return $defaultValues;
   }
 
@@ -192,6 +195,11 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
 
       if ($this->_action & CRM_Core_Action::UPDATE) {
         $apiParams['id'] = $this->_id;
+        // Ensure is_active has a value (because it's a checkbox, it will be undefined
+        // (and thus not saved) if it's un-checked.
+        if (!isset($apiParams['is_active'])) {
+          $apiParams['is_active'] = 0;
+        }
       }
 
       $caseReminderType = _casereminder_civicrmapi('CaseReminderType', 'create', $apiParams);
