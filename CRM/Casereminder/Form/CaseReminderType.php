@@ -7,7 +7,7 @@ use CRM_Casereminder_ExtensionUtil as E;
  *
  * @see https://docs.civicrm.org/dev/en/latest/framework/quickform/
  */
-class CRM_Casereminder_Form_CasereminderType extends CRM_Admin_Form {
+class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
 
   /**
    * Explicitly declare the entity api name.

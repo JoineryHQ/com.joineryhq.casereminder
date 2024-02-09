@@ -2,7 +2,7 @@
 <menu>
   <item>
     <path>civicrm/admin/casereminder/type</path>
-    <page_callback>CRM_Casereminder_Form_CasereminderType</page_callback>
+    <page_callback>CRM_Casereminder_Form_CaseReminderType</page_callback>
     <title>Case Reminder Type</title>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
