@@ -35,6 +35,16 @@ class CRM_Casereminder_Page_CaseReminderTypes extends CRM_Core_Page_Basic {
           'qs' => 'action=update&id=%%id%%&reset=1',
           'title' => E::ts('Edit Case Reminder Type'),
         ),
+        CRM_Core_Action::DISABLE => [
+          'name' => ts('Disable'),
+          'ref' => 'crm-enable-disable',
+          'title' => ts('Disable Case Reminder Type'),
+        ],
+        CRM_Core_Action::ENABLE => [
+          'name' => ts('Enable'),
+          'ref' => 'crm-enable-disable',
+          'title' => ts('Enable Case Reminder Type'),
+        ],
         (CRM_Core_Action::DELETE) => array(
           'name' => E::ts('Delete'),
           'url' => 'civicrm/admin/casereminder/types/',
@@ -62,14 +72,23 @@ class CRM_Casereminder_Page_CaseReminderTypes extends CRM_Core_Page_Basic {
 
     parent::browse();
 
-//    $rows = $this->get_template_vars('rows');
-//    foreach ($rows as &$row) {
-//      $row['entity_type'] = CRM_Jentitylink_Util::arrayExplodePaddedTrim($row['entity_type']);
-//    }
-//    ksort($rows);
-//    $this->assign('rows', $rows);
+      
+    $rows = $this->get_template_vars('rows');
+    foreach ($rows as &$row) {
+      $row['case_status_id'] = CRM_Jentitylink_Util::arrayExplodePaddedTrim($row['case_status_id']);
+      $row['recipient_relationship_type_id'] = CRM_Jentitylink_Util::arrayExplodePaddedTrim($row['recipient_relationship_type_id']);
+    }
+    ksort($rows);
+    $this->assign('rows', $rows);
 //    $this->assign('entity_type_options', CRM_Jentitylink_Util::getEntityTypeOptions());
-//    $this->assign('entity_name_options', CRM_Jentitylink_Linkbuilder::getSupportedEntityNames());
+      $this->assign('case_type_options', CRM_Case_BAO_Case::buildOptions('case_type_id'));
+      $this->assign('case_status_options', CRM_Case_BAO_Case::buildOptions('case_status_id'));
+      $this->assign('msg_template_options', CRM_Core_BAO_MessageTemplate::getMessageTemplates(FALSE));
+      $this->assign('recipient_options', array_flip(array_merge(
+        array(E::ts('Case Contact') => -1),
+        array_flip(CRM_Contact_BAO_Relationship::buildOptions('relationship_type_id'))
+      )));
+
 
 //    CRM_Core_Resources::singleton()->addVars('jentitylink', $jsVars);
 //    CRM_Core_Resources::singleton()->addScriptFile('com.joineryhq.jentitylink', 'js/CRM_Jentitylink_Page_Links.js');
@@ -81,14 +100,14 @@ class CRM_Casereminder_Page_CaseReminderTypes extends CRM_Core_Page_Basic {
    * @inheritDoc
    */
   public function editForm() {
-    return 'CRM_Jentitylink_Form_Link';
+    return 'CRM_Casereminder_Form_CaseReminderType';
   }
 
   /**
    * @inheritDoc
    */
   public function editName() {
-    return E::ts('Entity Navigation Links');
+    return E::ts('Case Reminder Type');
   }
 
   /**

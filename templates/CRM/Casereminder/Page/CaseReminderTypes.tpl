@@ -20,35 +20,37 @@
             <thead>
               <tr>
                 <th id="sortable">{ts}ID{/ts}</th>
-                <th id="sortable">{ts}Entity name{/ts}</th>
-                <th id="sortable">{ts}Entity type(s){/ts}</th>
-                <th id="sortable">{ts}Context(s){/ts}</th>
-                <th id="sortable">{ts}Link label{/ts}</th>
-                <th id="sortable">{ts}Weight{/ts}</th>
+                <th id="sortable">{ts}Case type{/ts}</th>
+                <th id="sortable">{ts}Case status{/ts}</th>
+                <th id="sortable">{ts}Template{/ts}</th>
+                <th id="sortable">{ts}Recipients{/ts}</th>
+                <th id="sortable">{ts}Subject{/ts}</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               {foreach from=$rows item=row key=linkId}
-                <tr id="jentitylink-{$row.id}" class="crm-entity {cycle values="odd-row,even-row"} {$row.class}{if $row.is_active == 0} sdisabled{/if} ">
-                  <td class="crm-jentitylink-id" data-field="id">{$row.id}</td>
-                  <td class="crm-jentitylink-entity-name" data-field="entity_name">{$entity_name_options[$row.entity_name]}</td>
-                  <td class="crm-jentitylink-entity-type" data-field="entity_type">
-                    {if empty($row.entity_type)}
+                <tr id="caseremindertype-{$row.id}" class="crm-entity {cycle values="odd-row,even-row"} {$row.class}{if $row.is_active == 0} sdisabled{/if} ">
+                  <td class="crm-caseremindertype-id" data-field="id">{$row.id}</td>
+                  <td class="crm-caseremindertype-case-type-di" data-field="case_type_id">{$case_type_options[$row.case_type_id]}</td>
+                  <td class="crm-caseremindertype-case-status-id" data-field="case_status_id">
+                    {if empty($row.case_status_id)}
                       (Any)
                     {else}
-                      {foreach from=$row.entity_type item=entity_type}
-                        {$entity_type_options.$entity_type}<br>
+                      {foreach from=$row.case_status_id item=case_status_id}
+                        {$case_status_options.$case_status_id}<br>
                       {/foreach}
                     {/if}
                   </td>
-                  <td class="crm-jentitylink-ops" data-field="ops">
-                    {foreach from=$opsByLinkId[$row.id] item=op}
-                      {$op}<br>
+                  <td class="crm-caseremindertype-msg-template-id" data-field="msg_template_id">
+                    {$msg_template_options[$row.msg_template_id]}
+                  </td>
+                  <td class="crm-caseremindertype-recipient-relationship-type-id" data-field="recipient_relationship_type_id">
+                    {foreach from=$row.recipient_relationship_type_id item=recipient_relationship_type_id}
+                      {$recipient_options.$recipient_relationship_type_id}<br>
                     {/foreach}
                   </td>
-                  <td class="crm-jentitylink-name" data-field="name">{$row.name}</td>
-                  <td class="crm-jentitylink-weight" data-field="weight">{$row.weight}</td>
+                  <td class="crm-caseremindertype-subject" data-field="subject">{$row.subject}</td>
                   <td>{$row.extraAction|replace:'xx':$row.id}{$row.action|replace:'xx':$row.id}</td>
                 </tr>
               {/foreach}

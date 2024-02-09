@@ -80,7 +80,6 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
         TRUE,
         // attributes
         ['class' => 'crm-select2', 'placeholder' => E::ts('- select -'), 'style' => 'width: 30rem;']
-              
       );
 
       $recipientOptions = array_merge(
