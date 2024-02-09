@@ -60,9 +60,10 @@
   </field>    
   
   <field>
-    <name>from_email_address_id</name>
-    <type>int unsigned</type>
-    <comment>Implicit FK to civicrm_option_value where option_group = from_email_address</comment>
+    <name>from_email_address</name>
+    <type>varchar</type>
+    <length>256</length>
+    <comment>Email address selected from domain list of From addresses.</comment>
   </field>
   
   <field>
@@ -70,6 +71,13 @@
     <type>varchar</type>
     <length>128</length>
     <comment>Subject of reminder email</comment>
+  </field>
+  
+  <field>
+    <name>dow</name>
+    <type>varchar</type>
+    <length>64</length>
+    <comment>Day of week to send reminders</comment>
   </field>
   
   <field>

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<menu>
+  <item>
+    <path>civicrm/admin/casereminder/type</path>
+    <page_callback>CRM_Casereminder_Form_CasereminderType</page_callback>
+    <title>Case Reminder Type</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+</menu>
