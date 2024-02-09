@@ -28,14 +28,13 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
       CRM_Utils_System::setTitle('Create Case Reminder Type');
     }
 
-
     if ($this->_action & CRM_Core_Action::DELETE) {
       $descriptions['delete_warning'] = E::ts('Are you sure you want to delete this Case Reminder Type?');
     }
     else {
       $descriptions = [
         'case_type_id' => NULL,
-        'case_status_id' => E::ts('If any statuses are selected, reminders will only be sent for cases in one of the selected statuses. Select nothing to send reminders regardless of case status.'), 
+        'case_status_id' => E::ts('If any statuses are selected, reminders will only be sent for cases in one of the selected statuses. Select nothing to send reminders regardless of case status.'),
         'msg_template_id' => NULL,
         'recipient_relationship_type_id' => NULL,
         'from_email_address' => NULL,
@@ -45,7 +44,7 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
         'is_active' => NULL,
       ];
 
-      $caseTypeOptions = CRM_Case_BAO_Case::buildOptions('case_type_id');      
+      $caseTypeOptions = CRM_Case_BAO_Case::buildOptions('case_type_id');
       $this->add(
         // field type
         'select',
@@ -58,9 +57,9 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
         // is required
         TRUE,
         // attributes
-        ['class' => 'crm-select2', 'placeholder' => E::ts('- select -'), 'style' => 'width: 30rem;']              
+        ['class' => 'crm-select2', 'placeholder' => E::ts('- select -'), 'style' => 'width: 30rem;']
       );
-      
+
       $caseStatusOptions = CRM_Case_BAO_Case::buildOptions('case_status_id');
       $this->addCheckBox('case_status_id', ts('Case Status'),
         array_flip($caseStatusOptions),
@@ -121,13 +120,13 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
       );
 
       $dowOptions = [
-          'sunday' => E::ts('Sunday'),
-          'monday' => E::ts('Monday'),
-          'tuesday' => E::ts('Tuesday'),
-          'wednesday' => E::ts('Wednesday'),
-          'thursday' => E::ts('Thursday'),
-          'friday' => E::ts('Friday'),
-          'saturday' => E::ts('Saturday'),
+        'sunday' => E::ts('Sunday'),
+        'monday' => E::ts('Monday'),
+        'tuesday' => E::ts('Tuesday'),
+        'wednesday' => E::ts('Wednesday'),
+        'thursday' => E::ts('Thursday'),
+        'friday' => E::ts('Friday'),
+        'saturday' => E::ts('Saturday'),
       ];
       $this->add(
         // field type
@@ -143,7 +142,7 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
         // attributes
         ['class' => 'crm-select2', 'placeholder' => E::ts('- select -'), 'style' => 'width: 30rem;']
       );
-      
+
       $this->add('checkbox', 'is_active', ts('Enabled?'));
     }
 
@@ -165,16 +164,16 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
       ));
       $defaultValues = $result;
       // Unpack multi-value packed values.
-      $defaultValues['case_status_id'] = array_fill_keys(CRM_Utils_Array::explodePadded($defaultValues['case_status_id']), 1);      
+      $defaultValues['case_status_id'] = array_fill_keys(CRM_Utils_Array::explodePadded($defaultValues['case_status_id']), 1);
       $defaultValues['recipient_relationship_type_id'] = array_fill_keys(CRM_Utils_Array::explodePadded($defaultValues['recipient_relationship_type_id']), 1);
-      
+
     }
-    else if (!$this->_id && (($this->_action & CRM_Core_Action::ADD))) {
+    elseif (!$this->_id && (($this->_action & CRM_Core_Action::ADD))) {
       $fromAddresses = CRM_Core_OptionGroup::values('from_email_address');
       $defaultFromAddressKey = CRM_Core_OptionGroup::getDefaultValue('from_email_address');
       $defaultValues = [
         'from_email_address' => $fromAddresses[$defaultFromAddressKey],
-        'is_active' => 1,          
+        'is_active' => 1,
       ];
     }
     return $defaultValues;

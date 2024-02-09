@@ -4,20 +4,20 @@ use CRM_Casereminder_ExtensionUtil as E;
 class CRM_Casereminder_Page_CaseReminderTypes extends CRM_Core_Page_Basic {
 
   /**
-   * @inheritDoc
    * @var bool
+   * @inheritDoc
    */
   public $useLivePageJS = TRUE;
 
   /**
-   * @inheritDoc
    * @var string
+   * @inheritDoc
    */
   public static $_links = NULL;
 
   /**
-   * @inheritDoc
    * @var string
+   * @inheritDoc
    */
   public function getBAOName() {
     return 'CRM_Casereminder_BAO_CaseReminderType';
@@ -34,7 +34,7 @@ class CRM_Casereminder_Page_CaseReminderTypes extends CRM_Core_Page_Basic {
           'url' => 'civicrm/admin/casereminder/types/',
           'qs' => 'action=update&id=%%id%%&reset=1',
           'title' => E::ts('Edit Case Reminder Type'),
-        ),  
+        ),
         (CRM_Core_Action::DELETE) => array(
           'name' => E::ts('Delete'),
           'url' => 'civicrm/admin/casereminder/types/',

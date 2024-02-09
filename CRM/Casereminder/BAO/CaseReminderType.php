@@ -23,6 +23,6 @@ class CRM_Casereminder_BAO_CaseReminderType extends CRM_Casereminder_DAO_CaseRem
       return $entity;
     }
     return NULL;
-  }  
+  }
 
 }
