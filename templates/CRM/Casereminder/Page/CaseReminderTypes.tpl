@@ -7,9 +7,11 @@
 
   <div class="crm-content-block crm-block">
     {if $rows}
-      <div class="action-link">
-        {crmButton p="civicrm/admin/casereminder/type" q="action=add&reset=1" icon="plus-circle"}{ts}Add Case Reminder Type{/ts}{/crmButton}
-      </div>
+      {if $rows|@count > 5}
+        <div class="action-link">
+          {crmButton p="civicrm/admin/casereminder/type" q="action=add&reset=1" icon="plus-circle"}{ts}Add Case Reminder Type{/ts}{/crmButton}
+        </div>
+      {/if}
 
       <div id="ltype">
         {strip}
@@ -60,8 +62,8 @@
       </div>
     {else}
       <div class="messages status no-popup">
-        <img src="{$config->resourceBase}i/Inform.gif" alt="{ts}status{/ts}"/>
-        {ts}None found.{/ts}
+        <i class="crm-i fa-info-circle" aria-hidden="true"></i>
+        {ts}There are currently no Case Reminder Types.{/ts}
       </div>
     {/if}
     <div class="action-link">
