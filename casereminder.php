@@ -86,3 +86,40 @@ function _casereminder_civicrmapi($entity, $action, $params, $contextMessage = N
 
   return $result;
 }
+
+/**
+ * Implements hook_civicrm_navigationMenu().
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_navigationMenu
+ */
+function casereminder_civicrm_navigationMenu(&$menu) {
+  _casereminder_get_max_navID($menu, $max_navID);
+  $item = [
+    'label' => E::ts('Case Reminder Types'),
+    'name' => 'CaseReminderTypes',
+    'url' => 'civicrm/admin/casereminder/types?reset=1',
+    'permission' => 'administer_casereminder',
+    'operator' => 'AND',
+    'separator' => NULL,
+    'navId' => ++$max_navID,
+  ];
+  _casereminder_civix_insert_navigation_menu($menu, 'Administer/CiviCase', $item);
+  _casereminder_civix_navigationMenu($menu);
+}
+
+/**
+ * For an array of menu items, recursively get the value of the greatest navID
+ * attribute.
+ * @param <type> $menu
+ * @param <type> $max_navID
+ */
+function _casereminder_get_max_navID(&$menu, &$max_navID = NULL) {
+  foreach ($menu as $id => $item) {
+    if (!empty($item['attributes']['navID'])) {
+      $max_navID = max($max_navID, $item['attributes']['navID']);
+    }
+    if (!empty($item['child'])) {
+      _casereminder_get_max_navID($item['child'], $max_navID);
+    }
+  }
+}
