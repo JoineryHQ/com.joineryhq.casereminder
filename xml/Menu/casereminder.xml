@@ -4,12 +4,12 @@
     <path>civicrm/admin/casereminder/type</path>
     <page_callback>CRM_Casereminder_Form_CaseReminderType</page_callback>
     <title>Case Reminder Type</title>
-    <access_arguments>access CiviCRM</access_arguments>
+    <access_arguments>administer_casereminder</access_arguments>
   </item>
   <item>
     <path>civicrm/admin/casereminder/types</path>
     <page_callback>CRM_Casereminder_Page_CaseReminderTypes</page_callback>
     <title>Case Reminder Types</title>
-    <access_arguments>access CiviCRM</access_arguments>
+    <access_arguments>administer_casereminder</access_arguments>
   </item>
 </menu>

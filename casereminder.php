@@ -5,6 +5,18 @@ require_once 'casereminder.civix.php';
 use CRM_Casereminder_ExtensionUtil as E;
 
 /**
+ * Implements hook_civicrm_permission().
+ *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_permission/
+ */
+function casereminder_civicrm_permission(&$permissions): void {
+  $permissions['administer_casereminder'] = [
+    'label' => E::ts('CiviCRM: administer Case Reminders'),
+    'description' => E::ts(''),
+  ];
+}
+
+/**
  * Implements hook_civicrm_config().
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_config/
