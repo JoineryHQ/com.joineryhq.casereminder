@@ -9,7 +9,7 @@
   <item>
     <path>civicrm/admin/casereminder/types</path>
     <page_callback>CRM_Casereminder_Page_CaseReminderTypes</page_callback>
-    <title>CaseReminderTypes</title>
+    <title>Case Reminder Types</title>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
 </menu>

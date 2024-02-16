@@ -40,9 +40,14 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
         'from_email_address' => NULL,
         'subject' => NULL,
         'dow' => NULL,
-        'max_iterations' => NULL,
+        'max_iterations' => E::ts('Maximum number of times to send this reminder on any given case. If this is blank (or 0), no such limitation will be enforced.'),
         'is_active' => NULL,
       ];
+
+      $caseStatusValuesByTypeId = $this->getCaseStatusValuesByTypeId();
+      $caseStatusOptions = $this->getCaseStatusOptions();
+      $caseRoleValuesByTypeId = $this->getCaseRoleValuesByTypeId();
+      $recipientOptions = $this->getRecipientOptions();
 
       $caseTypeOptions = CRM_Case_BAO_Case::buildOptions('case_type_id');
       $this->add(
@@ -60,9 +65,15 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
         ['class' => 'crm-select2', 'placeholder' => E::ts('- select -'), 'style' => 'width: 30rem;']
       );
 
-      $caseStatusOptions = CRM_Case_BAO_Case::buildOptions('case_status_id');
-      $this->addCheckBox('case_status_id', ts('Case Status'),
-        array_flip($caseStatusOptions),
+      $this->addCheckBox(
+        'case_status_id',
+        ts('Case Status'),
+        $caseStatusOptions,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        ''
       );
 
       $msgTemplateOptions = CRM_Core_BAO_MessageTemplate::getMessageTemplates(FALSE);
@@ -81,13 +92,13 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
         ['class' => 'crm-select2', 'placeholder' => E::ts('- select -'), 'style' => 'width: 30rem;']
       );
 
-      $recipientOptions = array_merge(
-        array(E::ts('Case Contact') => -1),
-        array_flip(CRM_Contact_BAO_Relationship::buildOptions('relationship_type_id'))
-      );
       $this->addCheckBox('recipient_relationship_type_id', ts('Recipients'),
         $recipientOptions,
-        NULL, NULL, TRUE
+        NULL,
+        NULL,
+        TRUE,
+        NULL,
+        ''
       );
 
       $fromOptions = CRM_Core_BAO_Email::domainEmails();
@@ -143,6 +154,9 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
         ['class' => 'crm-select2', 'placeholder' => E::ts('- select -'), 'style' => 'width: 30rem;']
       );
 
+      $this->add('number', 'max_iterations', E::ts('Maximum iterations per case'), ['min' => 0]);
+      $this->addRule('max_iterations', E::ts('Value should be a positive number'), 'positiveInteger');
+
       $this->add('checkbox', 'is_active', ts('Enabled?'));
     }
 
@@ -150,6 +164,18 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
     $this->assign('elementNames', $this->getRenderableElementNames());
     $this->assign('descriptions', $descriptions);
     $this->assign('id', $this->_id);
+
+    // Get metadata for on-page behaviors.
+    $jsVars = [
+      'caseStatusValuesByTypeId' => $caseStatusValuesByTypeId,
+      'caseRoleValuesByTypeId' => $caseRoleValuesByTypeId,
+    ];
+
+    CRM_Core_Resources::singleton()->addvars('casereminder', $jsVars);
+    // Add css files
+    CRM_Core_Resources::singleton()->addStyleFile('casereminder', 'css/CRM_Casereminder_Form_CaseReminderType.css');
+    // Add js file
+    CRM_Core_Resources::singleton()->addScriptFile('casereminder', 'js/CRM_Casereminder_Form_CaseReminderType.js');
   }
 
   /**
@@ -226,6 +252,94 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
       }
     }
     return $elementNames;
+  }
+
+  private function getCaseTypeDefinitions() {
+    static $ret;
+    if (!isset($ret)) {
+      $ret = [];
+      $caseTypeGet = _casereminder_civicrmapi('caseType', 'get', [
+        'sequential' => 1,
+        'return' => ["definition"],
+        'is_active' => TRUE,
+      ], ['limit' => 0]);
+      foreach ($caseTypeGet['values'] as $value) {
+        $ret[$value['id']] = $value['definition'];
+      }
+    }
+    return $ret;
+  }
+
+  private function getCaseStatusOptions() {
+    $caseStatusValuesByTypeId = $this->getCaseStatusValuesByTypeId();
+    $buildOptions = $this->filterOptionsByCaseOptions(CRM_Case_BAO_Case::buildOptions('case_status_id'), $caseStatusValuesByTypeId);
+    return array_flip($buildOptions);
+  }
+
+  private function getCaseStatusValuesByTypeId() {
+    static $caseStatusValuesByTypeId;
+    if (!isset($caseStatusValuesByTypeId)) {
+      $caseStatusValuesByTypeId = [];
+
+      $caseStatusGet = $result = civicrm_api3('OptionValue', 'get', [
+        'sequential' => 1,
+        'option_group_id' => "case_status",
+        'is_active' => TRUE,
+      ]);
+      $caseStatusesByName = CRM_Utils_Array::rekey($caseStatusGet['values'], 'name');
+
+      $caseTypeDefinitions = $this->getCaseTypeDefinitions();
+      foreach ($caseTypeDefinitions as $caseTypeId => $caseTypeDefinition) {
+        $caseStatusValuesByTypeId[$caseTypeId] = [];
+        $caseRoleValuesByTypeId[$caseTypeId] = [];
+        foreach ($caseTypeDefinition['statuses'] as $statusName) {
+          $caseStatusValuesByTypeId[$caseTypeId][] = $caseStatusesByName[$statusName]['value'];
+        }
+      }
+    }
+    return $caseStatusValuesByTypeId;
+  }
+
+  private function getRecipientOptions() {
+    $caseRoleValuesByTypeId = $this->getCaseRoleValuesByTypeId();
+    $buildOptions = [
+      '-1' => E::ts('Case client'),
+    ];
+    $buildOptions += $this->filterOptionsByCaseOptions(CRM_Contact_BAO_Relationship::buildOptions('relationship_type_id'), $caseRoleValuesByTypeId);
+    return array_flip($buildOptions);
+  }
+
+  private function getCaseRoleValuesByTypeId() {
+    static $caseRoleValuesByTypeId;
+    if (!isset($caseRoleValuesByTypeId)) {
+      $caseRoleValuesByTypeId = [];
+
+      $relationshipTypeGet = $result = civicrm_api3('RelationshipType', 'get', [
+        'sequential' => 1,
+        'option_group_id' => "case_status",
+        'is_active' => TRUE,
+      ]);
+      $relationshipTypesByName = CRM_Utils_Array::rekey($relationshipTypeGet['values'], 'name_b_a');
+
+      $caseTypeDefinitions = $this->getCaseTypeDefinitions();
+      foreach ($caseTypeDefinitions as $caseTypeId => $caseTypeDefinition) {
+        // Start with -1 ("Case client"), which is a "fake" role that's valid for all case types.
+        $caseRoleValuesByTypeId[$caseTypeId] = ['-1'];
+        foreach ($caseTypeDefinition['caseRoles'] as $caseRole) {
+          $roleName = $caseRole['name'];
+          $caseRoleValuesByTypeId[$caseTypeId][] = $relationshipTypesByName[$roleName]['id'];
+        }
+      }
+    }
+    return $caseRoleValuesByTypeId;
+  }
+
+  private function filterOptionsByCaseOptions($options, $caseStatusValuesByTypeId) {
+    $caseValues = [];
+    foreach ($caseStatusValuesByTypeId as $values) {
+      $caseValues += array_intersect_key($options, array_flip($values));
+    }
+    return $caseValues;
   }
 
 }

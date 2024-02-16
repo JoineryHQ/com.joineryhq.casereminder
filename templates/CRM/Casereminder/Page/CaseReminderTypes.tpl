@@ -31,7 +31,7 @@
             <tbody>
               {foreach from=$rows item=row key=linkId}
                 <tr id="caseremindertype-{$row.id}" class="crm-entity {cycle values="odd-row,even-row"} {$row.class}{if $row.is_active == 0} disabled{/if} ">
-                  <td class="crm-caseremindertype-id" data-field="id">{$row.id}|{$row.is_active}</td>
+                  <td class="crm-caseremindertype-id" data-field="id">{$row.id}</td>
                   <td class="crm-caseremindertype-case-type-di" data-field="case_type_id">{$case_type_options[$row.case_type_id]}</td>
                   <td class="crm-caseremindertype-case-status-id" data-field="case_status_id">
                     {if empty($row.case_status_id)}
