@@ -11,8 +11,8 @@ use CRM_Casereminder_ExtensionUtil as E;
  */
 function casereminder_civicrm_permission(&$permissions): void {
   $permissions['administer_casereminder'] = [
-    'label' => E::ts('CiviCRM: administer Case Reminders'),
-    'description' => E::ts(''),
+    'label' => E::ts('Case Reminders: administer Case Reminders'),
+    'description' => E::ts('Administer all settings and configurations for Case Reminders'),
   ];
 }
 
