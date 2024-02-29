@@ -38,4 +38,7 @@
     <mixin>menu-xml@1.0.0</mixin>
   </mixins>
   <upgrader>CRM_Casereminder_Upgrader</upgrader>
+  <requires>
+    <ext>org.civicoop.emailapi</ext>
+  </requires>
 </extension>
