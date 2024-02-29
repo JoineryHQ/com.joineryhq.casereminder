@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Casereminder</base>
+  <class>CaseReminderLogType</class>
+  <name>civicrm_case_reminder_log_type</name>
+  <comment>Logs for Case Reminder Types</comment>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique CaseReminderLogType ID</comment>
+    <html>
+      <type>Number</type>
+    </html>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>log_time</name>
+    <type>timestamp</type>
+    <comment>When log entry created.</comment>
+    <required>false</required>
+    <export>true</export>
+    <default>CURRENT_TIMESTAMP</default>
+    <readonly>true</readonly>    
+  </field>
+
+  <field>
+    <name>case_reminder_type_id</name>
+    <type>int unsigned</type>
+    <comment>FK to Reminder Type</comment>
+    <required>true</required>
+    <export>true</export>
+  </field>
+  <foreignKey>
+    <name>case_reminder_type_id</name>
+    <table>civicrm_case_reminder_type</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>action</name>
+    <type>varchar</type>
+    <length>255</length>
+    <comment>Standardized description of action logged</comment>
+    <required>true</required>
+    <export>true</export>
+  </field>
+  
+  <index>
+    <name>action</name>
+    <fieldName>action</fieldName>
+  </index>
+</table>

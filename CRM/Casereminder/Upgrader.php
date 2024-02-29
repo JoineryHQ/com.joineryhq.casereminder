@@ -61,17 +61,44 @@ class CRM_Casereminder_Upgrader extends CRM_Extension_Upgrader_Base {
   // }
 
   /**
-   * Example: Run a couple simple queries.
+   * Add log tables
    *
    * @return TRUE on success
    * @throws CRM_Core_Exception
    */
-  // public function upgrade_4200(): bool {
-  //   $this->ctx->log->info('Applying update 4200');
-  //   CRM_Core_DAO::executeQuery('UPDATE foo SET bar = "whiz"');
-  //   CRM_Core_DAO::executeQuery('DELETE FROM bang WHERE willy = wonka(2)');
-  //   return TRUE;
-  // }
+   public function upgrade_4200(): bool {
+    $this->ctx->log->info('Applying update 4200: Add log tables');
+    CRM_Core_DAO::executeQuery('DROP TABLE IF EXISTS `civicrm_case_reminder_log_case`');
+    CRM_Core_DAO::executeQuery("
+      CREATE TABLE `civicrm_case_reminder_log_case` (
+        `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique CaseReminderLogCase ID',
+        `log_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When log entry created.',
+        `case_reminder_type_id` int unsigned NOT NULL COMMENT 'FK to Reminder Type',
+        `case_id` int unsigned NOT NULL COMMENT 'FK to Case',
+        `action` varchar(255) NOT NULL COMMENT 'Standardized description of action logged',
+        PRIMARY KEY (`id`),
+        INDEX `action`(action),
+        CONSTRAINT FK_civicrm_case_reminder_log_case_case_reminder_type_id FOREIGN KEY (`case_reminder_type_id`) REFERENCES `civicrm_case_reminder_type`(`id`) ON DELETE CASCADE,
+        CONSTRAINT FK_civicrm_case_reminder_log_case_case_id FOREIGN KEY (`case_id`) REFERENCES `civicrm_case`(`id`) ON DELETE CASCADE
+      )
+      ENGINE=InnoDB;
+    ");
+       
+    CRM_Core_DAO::executeQuery('DROP TABLE IF EXISTS `civicrm_case_reminder_log_type`');
+    CRM_Core_DAO::executeQuery("
+      CREATE TABLE `civicrm_case_reminder_log_type` (
+        `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique CaseReminderLogType ID',
+        `log_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When log entry created.',
+        `case_reminder_type_id` int unsigned NOT NULL COMMENT 'FK to Reminder Type',
+        `action` varchar(255) NOT NULL COMMENT 'Standardized description of action logged',
+        PRIMARY KEY (`id`),
+        INDEX `action`(action),
+        CONSTRAINT FK_civicrm_case_reminder_log_type_case_reminder_type_id FOREIGN KEY (`case_reminder_type_id`) REFERENCES `civicrm_case_reminder_type`(`id`) ON DELETE CASCADE
+      )
+      ENGINE=InnoDB;
+    ");
+    return TRUE;
+   }
 
   /**
    * Example: Run an external SQL script.

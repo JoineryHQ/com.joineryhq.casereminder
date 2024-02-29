@@ -17,6 +17,8 @@
 
 SET FOREIGN_KEY_CHECKS=0;
 
+DROP TABLE IF EXISTS `civicrm_case_reminder_log_type`;
+DROP TABLE IF EXISTS `civicrm_case_reminder_log_case`;
 DROP TABLE IF EXISTS `civicrm_case_reminder_type`;
 
 SET FOREIGN_KEY_CHECKS=1;
@@ -47,5 +49,43 @@ CREATE TABLE `civicrm_case_reminder_type` (
   PRIMARY KEY (`id`),
   CONSTRAINT FK_civicrm_case_reminder_type_case_type_id FOREIGN KEY (`case_type_id`) REFERENCES `civicrm_case_type`(`id`) ON DELETE CASCADE,
   CONSTRAINT FK_civicrm_case_reminder_type_msg_template_id FOREIGN KEY (`msg_template_id`) REFERENCES `civicrm_msg_template`(`id`) ON DELETE SET NULL
+)
+ENGINE=InnoDB;
+
+-- /*******************************************************
+-- *
+-- * civicrm_case_reminder_log_case
+-- *
+-- * Logs for Case Reminders per case
+-- *
+-- *******************************************************/
+CREATE TABLE `civicrm_case_reminder_log_case` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique CaseReminderLogCase ID',
+  `log_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When log entry created.',
+  `case_reminder_type_id` int unsigned NOT NULL COMMENT 'FK to Reminder Type',
+  `case_id` int unsigned NOT NULL COMMENT 'FK to Case',
+  `action` varchar(255) NOT NULL COMMENT 'Standardized description of action logged',
+  PRIMARY KEY (`id`),
+  INDEX `action`(action),
+  CONSTRAINT FK_civicrm_case_reminder_log_case_case_reminder_type_id FOREIGN KEY (`case_reminder_type_id`) REFERENCES `civicrm_case_reminder_type`(`id`) ON DELETE CASCADE,
+  CONSTRAINT FK_civicrm_case_reminder_log_case_case_id FOREIGN KEY (`case_id`) REFERENCES `civicrm_case`(`id`) ON DELETE CASCADE
+)
+ENGINE=InnoDB;
+
+-- /*******************************************************
+-- *
+-- * civicrm_case_reminder_log_type
+-- *
+-- * Logs for Case Reminder Types
+-- *
+-- *******************************************************/
+CREATE TABLE `civicrm_case_reminder_log_type` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique CaseReminderLogType ID',
+  `log_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When log entry created.',
+  `case_reminder_type_id` int unsigned NOT NULL COMMENT 'FK to Reminder Type',
+  `action` varchar(255) NOT NULL COMMENT 'Standardized description of action logged',
+  PRIMARY KEY (`id`),
+  INDEX `action`(action),
+  CONSTRAINT FK_civicrm_case_reminder_log_type_case_reminder_type_id FOREIGN KEY (`case_reminder_type_id`) REFERENCES `civicrm_case_reminder_type`(`id`) ON DELETE CASCADE
 )
 ENGINE=InnoDB;

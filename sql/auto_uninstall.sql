@@ -15,6 +15,8 @@
 
 SET FOREIGN_KEY_CHECKS=0;
 
+DROP TABLE IF EXISTS `civicrm_case_reminder_log_type`;
+DROP TABLE IF EXISTS `civicrm_case_reminder_log_case`;
 DROP TABLE IF EXISTS `civicrm_case_reminder_type`;
 
 SET FOREIGN_KEY_CHECKS=1;
