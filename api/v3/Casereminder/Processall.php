@@ -32,17 +32,21 @@ function _civicrm_api3_casereminder_Processall_spec(&$spec) {
  */
 function civicrm_api3_casereminder_Processall($params) {
   // Set "now" timestamp if provided.
-  CRM_Casereminder_Util_Time::singleton($params['timestamp']);
+  CRM_Casereminder_Util_Time::singleton($params['timestamp'] ?? NULL);
   
   $nowReminderTypes = CRM_Casereminder_Util_Casereminder::getNowReminderTypes();
   foreach ($nowReminderTypes as $nowReminderType) {
     if (CRM_Casereminder_Util_Casereminder::reminderTypeNeededNow($nowReminderType)) {
+      CRM_Casereminder_Util_Log::logReminderType($nowReminderType['id'], CRM_Casereminder_Util_Log::ACTION_REMINDER_TYPE_BEGIN);
       // Get cases matching this reminder type.
       $reminderTypeCases = CRM_Casereminder_Util_Casereminder::getReminderTypeCases($nowReminderType);
       foreach ($reminderTypeCases as $reminderTypeCase) {
-        $send = CRM_Casereminder_Util_Casereminder::sendCaseReminder($reminderTypeCase, $nowReminderType);
-        var_dump($send);
+        if (CRM_Casereminder_Util_Casereminder::reminderTypeCaseNeededNow($nowReminderType, $reminderTypeCase)) {
+          $send = CRM_Casereminder_Util_Casereminder::sendCaseReminder($reminderTypeCase, $nowReminderType);
+          CRM_Casereminder_Util_Log::logReminderCase($nowReminderType['id'], CRM_Casereminder_Util_Log::ACTION_CASE_SEND, $reminderTypeCase['id']);
+        }
       }
+      CRM_Casereminder_Util_Log::logReminderType($nowReminderType['id'], CRM_Casereminder_Util_Log::ACTION_REMINDER_TYPE_COMPLETE);
     }
   }
   

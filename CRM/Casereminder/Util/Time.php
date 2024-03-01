@@ -40,7 +40,30 @@ class CRM_Casereminder_Util_Time {
     return self::$_singleton;
   }
 
-  public function getNow() : DateTime {
+  public function getDateTime() : DateTime {
     return $this->now;
+  }
+
+  public function getMysqlDatetime() : string {
+    return $this->now->format('Y-m-d H:i:s');
+  }
+
+  public function getDayOfWeek() : string {
+    return $this->now->format('l');
+  }
+
+  public function getTodayRange() : array {
+    $nowTime = $this->now->getTimestamp();
+    $rangeMinTime = strtotime('today midnight', $nowTime);
+    $rangeMaxTime = $rangeMinTime + (24 * 60 * 60) - 1;
+    return [
+      date('YmdHis', $rangeMinTime),
+      date('YmdHis', $rangeMaxTime),
+    ];
+      
+  }
+
+  public function getFormatted($format) : string {
+    return $this->now->format($format);
   }
 }
