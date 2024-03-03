@@ -12,6 +12,8 @@ use Civi\Test\TransactionalInterface;
 class api_v3_CaseReminderLogTypeTest extends \PHPUnit\Framework\TestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
   use \Civi\Test\Api3TestTrait;
 
+  private $caseReminderTypeId;
+
   /**
    * Set up for headless tests.
    *
@@ -32,6 +34,21 @@ class api_v3_CaseReminderLogTypeTest extends \PHPUnit\Framework\TestCase impleme
     $table = CRM_Core_DAO_AllCoreTables::getTableForEntityName('CaseReminderLogType');
     $this->assertTrue($table && CRM_Core_DAO::checkTableExists($table), 'There was a problem with extension installation. Table for ' . 'CaseReminderLogType' . ' not found.');
     parent::setUp();
+    // CareReminderLogCase requires an actual case reminder type, so create that now.
+
+    $caseReminderTypeApiParams = [
+      'case_type' => 'housing_support',
+      'case_status_id' => [1, 2],
+      'msg_template_id' => 1,
+      'recipient_relationship_type_id' => [-1, 14],
+      'from_email_address' => '"Micky Mouse"<mickey@mouse.example.com>',
+      'subject' => 'Test subject',
+      'dow' => 'monday',
+      'max_iterations' => '1000',
+      'is_active' => 1,
+    ];
+    $createCaseReminderType = $this->callAPISuccess('CaseReminderType', 'create', $caseReminderTypeApiParams);
+    $this->caseReminderTypeId = $createCaseReminderType['id'];
   }
 
   /**
@@ -48,17 +65,22 @@ class api_v3_CaseReminderLogTypeTest extends \PHPUnit\Framework\TestCase impleme
    * Note how the function name begins with the word "test".
    */
   public function testCreateGetDelete(): void {
-    // Boilerplate entity has one data field -- 'contact_id'.
-    // Put some data in, read it back out, and delete it.
 
-    $created = $this->callAPISuccess('CaseReminderLogType', 'create', [
-      'contact_id' => 1,
-    ]);
+    $apiParams = [
+      'log_time' => '2023-01-01 12:34:56',
+      'case_reminder_type_id' => $this->caseReminderTypeId,
+      'action' => 'TESTING',
+    ];
+    $created = $this->callAPISuccess('CaseReminderLogType', 'create', $apiParams);
+
     $this->assertTrue(is_numeric($created['id']));
 
     $get = $this->callAPISuccess('CaseReminderLogType', 'get', []);
     $this->assertEquals(1, $get['count']);
-    $this->assertEquals(1, $get['values'][$created['id']]['contact_id']);
+    $testParams = [];
+    $testParams['id'] = $created['id'];
+    $testParams += $apiParams;
+    $this->assertEquals($get['values'][$created['id']], $testParams);
 
     $this->callAPISuccess('CaseReminderLogType', 'delete', [
       'id' => $created['id'],
