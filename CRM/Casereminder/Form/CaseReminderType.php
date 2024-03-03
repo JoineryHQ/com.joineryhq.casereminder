@@ -288,12 +288,22 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
       ]);
       $caseStatusesByName = CRM_Utils_Array::rekey($caseStatusGet['values'], 'name');
 
+      // A case type may have no specific statuses configured, which means it will
+      // use the default options: all available statuses.
+      $defaultStatuses = array_values(CRM_Utils_Array::collect('value', $caseStatusesByName));
+
       $caseTypeDefinitions = $this->getCaseTypeDefinitions();
       foreach ($caseTypeDefinitions as $caseTypeId => $caseTypeDefinition) {
         $caseStatusValuesByTypeId[$caseTypeId] = [];
-        $caseRoleValuesByTypeId[$caseTypeId] = [];
-        foreach ($caseTypeDefinition['statuses'] as $statusName) {
-          $caseStatusValuesByTypeId[$caseTypeId][] = $caseStatusesByName[$statusName]['value'];
+        if (isset($caseTypeDefinition['statuses']) && is_array($caseTypeDefinition['statuses'])) {
+          // If this case type has statuses defined, use those.
+          foreach ($caseTypeDefinition['statuses'] as $statusName) {
+            $caseStatusValuesByTypeId[$caseTypeId][] = $caseStatusesByName[$statusName]['value'];
+          }
+        }
+        else {
+          // Otherwise, use the default options.
+          $caseStatusValuesByTypeId[$caseTypeId] = $defaultStatuses;
         }
       }
     }
