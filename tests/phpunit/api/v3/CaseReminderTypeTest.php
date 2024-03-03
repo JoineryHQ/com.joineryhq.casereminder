@@ -51,14 +51,27 @@ class api_v3_CaseReminderTypeTest extends \PHPUnit\Framework\TestCase implements
     // Boilerplate entity has one data field -- 'contact_id'.
     // Put some data in, read it back out, and delete it.
 
-    $created = $this->callAPISuccess('CaseReminderType', 'create', [
-      'contact_id' => 1,
-    ]);
+    $apiParams = [
+      'case_type_id' => 1,
+      'case_status_id' => [1, 2],
+      'msg_template_id' => 1,
+      'recipient_relationship_type_id' => [-1, 14],
+      'from_email_address' => '"Micky Mouse"<mickey@mouse.example.com>',
+      'subject' => 'Test subject',
+      'dow' => 'monday',
+      'max_iterations' => '1000',
+      'is_active' => 1,
+    ];
+    $created = $this->callAPISuccess('CaseReminderType', 'create', $apiParams);
+
     $this->assertTrue(is_numeric($created['id']));
 
     $get = $this->callAPISuccess('CaseReminderType', 'get', []);
     $this->assertEquals(1, $get['count']);
-    $this->assertEquals(1, $get['values'][$created['id']]['contact_id']);
+    $testParams = [];
+    $testParams['id'] = $created['id'];
+    $testParams += $apiParams;
+    $this->assertEquals($get['values'][$created['id']], $testParams);
 
     $this->callAPISuccess('CaseReminderType', 'delete', [
       'id' => $created['id'],

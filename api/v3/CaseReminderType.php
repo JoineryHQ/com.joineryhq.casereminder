@@ -24,6 +24,16 @@ function _civicrm_api3_case_reminder_type_create_spec(&$spec) {
  * @throws API_Exception
  */
 function civicrm_api3_case_reminder_type_create($params) {
+  $packedArrayStringParams = [
+    'case_status_id',
+    'recipient_relationship_type_id',
+  ];
+  foreach ($packedArrayStringParams as $packedArrayStringParam) {
+    if (isset($params[$packedArrayStringParam]) && is_array($params[$packedArrayStringParam])) {
+      $params[$packedArrayStringParam] = CRM_Utils_Array::implodePadded($params[$packedArrayStringParam]);
+    }
+  }
+
   return _civicrm_api3_basic_create(_civicrm_api3_get_BAO(__FUNCTION__), $params, 'CaseReminderType');
 }
 

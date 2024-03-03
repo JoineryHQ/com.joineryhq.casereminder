@@ -190,8 +190,8 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
       ));
       $defaultValues = $result;
       // Unpack multi-value packed values.
-      $defaultValues['case_status_id'] = array_fill_keys(CRM_Utils_Array::explodePadded($defaultValues['case_status_id']), 1);
-      $defaultValues['recipient_relationship_type_id'] = array_fill_keys(CRM_Utils_Array::explodePadded($defaultValues['recipient_relationship_type_id']), 1);
+      $defaultValues['case_status_id'] = array_fill_keys($defaultValues['case_status_id'], 1);
+      $defaultValues['recipient_relationship_type_id'] = array_fill_keys($defaultValues['recipient_relationship_type_id'], 1);
 
     }
     elseif (!$this->_id && (($this->_action & CRM_Core_Action::ADD))) {
@@ -215,8 +215,8 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
       // store the submitted values in an array
       $submitted = $this->exportValues();
       $apiParams = $submitted;
-      $apiParams['case_status_id'] = CRM_Utils_Array::implodePadded(array_keys($apiParams['case_status_id']));
-      $apiParams['recipient_relationship_type_id'] = CRM_Utils_Array::implodePadded(array_keys($apiParams['recipient_relationship_type_id']));
+      $apiParams['case_status_id'] = array_keys($apiParams['case_status_id']);
+      $apiParams['recipient_relationship_type_id'] = array_keys($apiParams['recipient_relationship_type_id']);
 
       if ($this->_action & CRM_Core_Action::UPDATE) {
         $apiParams['id'] = $this->_id;
