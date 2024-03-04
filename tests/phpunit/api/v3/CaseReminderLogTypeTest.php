@@ -37,7 +37,7 @@ class api_v3_CaseReminderLogTypeTest extends \PHPUnit\Framework\TestCase impleme
     // CareReminderLogCase requires an actual case reminder type, so create that now.
 
     $caseReminderTypeApiParams = [
-      'case_type' => 'housing_support',
+      'case_type_id' => 1,
       'case_status_id' => [1, 2],
       'msg_template_id' => 1,
       'recipient_relationship_type_id' => [-1, 14],

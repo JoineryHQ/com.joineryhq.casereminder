@@ -12,7 +12,6 @@ use Civi\Test\TransactionalInterface;
 class api_v3_CaseReminderLogCaseTest extends \PHPUnit\Framework\TestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
   use \Civi\Test\Api3TestTrait;
   use \Civi\Test\ContactTestTrait;
-  use \Civi\Test\EntityTrait;
 
   private $contactIds = [];
   private $caseReminderTypeId;
@@ -44,7 +43,7 @@ class api_v3_CaseReminderLogCaseTest extends \PHPUnit\Framework\TestCase impleme
 
     // CareReminderLogCase requires an actual case reminder type, so create that now.
     $caseReminderTypeApiParams = [
-      'case_type' => 'housing_support',
+      'case_type_id' => 1,
       'case_status_id' => [1, 2],
       'msg_template_id' => 1,
       'recipient_relationship_type_id' => [-1, 14],

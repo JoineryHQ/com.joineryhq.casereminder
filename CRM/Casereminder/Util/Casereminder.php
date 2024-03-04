@@ -5,11 +5,11 @@
  *
  */
 class CRM_Casereminder_Util_Casereminder {
-  
+
   /**
    * Get all reminders that are scheduled to fire at the present moment.
-   * 
-   * @return Array of caseReminderTypes, each one an array as returned by 
+   *
+   * @return Array of caseReminderTypes, each one an array as returned by
    *   api caseReminderTypes.getSingle
    */
   public static function getNowReminderTypes() : array {
@@ -19,7 +19,7 @@ class CRM_Casereminder_Util_Casereminder {
     ]);
     return $caseReminderTypeGet['values'];
   }
-  
+
   /**
    * Get a list of all cases matching a given reminder type.
    *
@@ -33,18 +33,18 @@ class CRM_Casereminder_Util_Casereminder {
     ]);
     return $caseGet['values'];
   }
-  
+
   /**
    * FIXME: Stub.
    * Send a reminder of a given type for a given case.
    * @param array $case Array of properties as returned by api Case.getSingle
    * @param array $reminderType Array of properties as returned by api CaseReminderType.getSingle
-   * 
+   *
    * @return Output of api email.send (provided by emailapi extension)
    */
   public static function sendCaseReminder($case, $reminderType) {
     $recipientCids = self::buildRecipientList($case, $reminderType);
-    
+
     foreach ($recipientCids as $recipientCid) {
       $fromEmailParts = self::splitFromEmail($reminderType['from_email_address']);
 
@@ -70,7 +70,7 @@ class CRM_Casereminder_Util_Casereminder {
     }
     return $emailSend;
   }
-  
+
   public static function buildRecipientList($case, $reminderType) {
     $recipientCids = [];
     $reminderTypeRelationshipTypeIds = $reminderType['recipient_relationship_type_id'];
@@ -80,8 +80,8 @@ class CRM_Casereminder_Util_Casereminder {
     if (in_array(-1, $reminderTypeRelationshipTypeIds)) {
       $recipientCids[] = $caseClientId;
     }
-    
-    // Case probably lacks the 'contacts' attribute, because it was created 
+
+    // Case probably lacks the 'contacts' attribute, because it was created
     // (in self::getReminderTypeCases()) by case.get api without specifying an
     // id. That's frustrating but seems to be the reality of civicrm api3 at
     // the moment (unsure about api4).
@@ -89,7 +89,7 @@ class CRM_Casereminder_Util_Casereminder {
     if (!array_key_exists('contacts', $case)) {
       $case = _casereminder_civicrmapi('case', 'getSingle', ['id' => $case['id']]);
     }
-    
+
     // Add each case contact if relationship_type_id is called for.
     if (is_array($case['contacts'])) {
       foreach ($case['contacts'] as $caseContact) {
@@ -100,19 +100,19 @@ class CRM_Casereminder_Util_Casereminder {
     }
     return array_unique($recipientCids);
   }
-  
+
   /**
    * Should the given reminderType be processed now? (e.g. business rules may
    * indicate that a reminderType should not be processed twice in the same day,
    * so if this one has already been processed today, this would return FALSE).
-   * 
+   *
    * @param type $reminderType
    * @return boolean
    */
   public static function reminderTypeNeededNow($reminderType) : bool {
     // We don't process reminderTypes twice on the same date.
     // So check whether this reminderType has been COMPLETED today.
-    
+
     $todayRange = CRM_Casereminder_Util_Time::singleton()->getTodayRange();
     $apiParams = [
       'log_time' => ['BETWEEN' => $todayRange],
@@ -126,23 +126,23 @@ class CRM_Casereminder_Util_Casereminder {
     }
     return TRUE;
   }
-  
+
   /**
-   * Should the given case receive a reminder for the given reminderType, now? 
+   * Should the given case receive a reminder for the given reminderType, now?
    * (e.g. business rules may indicate that a reminderType should not be processed
    * that a case should never receive a reminder for the same reminderType twice
-   * in the same day, so if this case has already been sent a reminder for this 
+   * in the same day, so if this case has already been sent a reminder for this
    * reminderType today, this would return FALSE).
-   * 
+   *
    * FIXME: STUB
-   * 
+   *
    * @param type $reminderType
    * @return boolean
    */
   public static function reminderTypeCaseNeededNow($reminderType, $case) : bool {
     // We don't process reminderTypes twice on the same date.
     // So check whether this reminderType has been COMPLETED today.
-    
+
     $todayRange = CRM_Casereminder_Util_Time::singleton()->getTodayRange();
     $apiParams = [
       'log_time' => ['BETWEEN' => $todayRange],
@@ -152,20 +152,20 @@ class CRM_Casereminder_Util_Casereminder {
     ];
     $caseReminderLogCaseCount = _casereminder_civicrmapi('CaseReminderLogCase', 'getcount', $apiParams);
     if ($caseReminderLogCaseCount) {
-      // Case already has a sent reminder for this reminderType, so this reminder 
+      // Case already has a sent reminder for this reminderType, so this reminder
       // is not needed now.
       return FALSE;
     }
     return TRUE;
   }
-  
-  public static function splitFromEmail($fromEmail) {
+
+  public static function splitFromEmail($fromEmail) : array {
     $ret = [];
     $ret['email'] = CRM_Utils_Mail::pluckEmailFromHeader($fromEmail);
 
     $nameParts = explode('"', $fromEmail);
     $ret['name'] = $nameParts[1];
-    
+
     return $ret;
   }
 }

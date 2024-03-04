@@ -11,7 +11,7 @@
          cacheResult="false" 
          bootstrap="tests/phpunit/bootstrap.php">
   <testsuites>
-    <testsuite name="My Test Suite">
+    <testsuite name="All Tests">
       <directory>./tests/phpunit</directory>
     </testsuite>
   </testsuites>
