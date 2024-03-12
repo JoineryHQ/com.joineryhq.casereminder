@@ -11,6 +11,7 @@ use Civi\Test\TransactionalInterface;
  */
 class api_v3_CaseReminderTypeTest extends \PHPUnit\Framework\TestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
   use \Civi\Test\Api3TestTrait;
+  use CRM_CasereminderTestTrait;
 
   /**
    * Set up for headless tests.
@@ -31,6 +32,9 @@ class api_v3_CaseReminderTypeTest extends \PHPUnit\Framework\TestCase implements
   public function setUp(): void {
     $table = CRM_Core_DAO_AllCoreTables::getTableForEntityName('CaseReminderType');
     $this->assertTrue($table && CRM_Core_DAO::checkTableExists($table), 'There was a problem with extension installation. Table for ' . 'CaseReminderType' . ' not found.');
+
+    $this->setupCasereminderTests();
+
     parent::setUp();
   }
 
@@ -48,23 +52,20 @@ class api_v3_CaseReminderTypeTest extends \PHPUnit\Framework\TestCase implements
    * Note how the function name begins with the word "test".
    */
   public function testCreateGetDelete(): void {
-    // Boilerplate entity has one data field -- 'contact_id'.
-    // Put some data in, read it back out, and delete it.
-
     $apiParams = [
       'case_type_id' => 1,
       'case_status_id' => [1, 2],
       'msg_template_id' => 1,
       'recipient_relationship_type_id' => [-1, 14],
-      'from_email_address' => '"Micky Mouse"<mickey@mouse.example.com>',
+      'from_email_address' => '"Mickey Mouse"<mickey@mouse.example.com>',
       'subject' => 'Test subject',
       'dow' => 'monday',
       'max_iterations' => '1000',
       'is_active' => 1,
     ];
-    $created = $this->callAPISuccess('CaseReminderType', 'create', $apiParams);
-
-    $this->assertTrue(is_numeric($created['id']));
+    $caseReminderTypeCreate = $this->callAPISuccess('CaseReminderType', 'create', $apiParams);
+    $this->assertTrue(is_numeric($caseReminderTypeCreate['id']));
+    $created = $caseReminderTypeCreate['values'][$caseReminderTypeCreate['id']];
 
     $get = $this->callAPISuccess('CaseReminderType', 'get', []);
     $this->assertEquals(1, $get['count']);
@@ -76,6 +77,26 @@ class api_v3_CaseReminderTypeTest extends \PHPUnit\Framework\TestCase implements
     $this->callAPISuccess('CaseReminderType', 'delete', [
       'id' => $created['id'],
     ]);
+  }
+
+  /**
+   * api should accept case_status_id values as integer or string(name)
+   */
+  public function testCaseTypeIdCanBeStringName(): void {
+    $apiParams = [
+      'case_type_id' => 'housing_support',
+      'case_status_id' => [1, 2],
+      'msg_template_id' => 1,
+      'recipient_relationship_type_id' => [-1, 14],
+      'from_email_address' => '"Mickey Mouse"<mickey@mouse.example.com>',
+      'subject' => 'Test subject',
+      'dow' => 'monday',
+      'max_iterations' => '1000',
+      'is_active' => 1,
+    ];
+    $caseReminderTypeCreate = $this->callAPISuccess('CaseReminderType', 'create', $apiParams);
+    $this->assertTrue(is_numeric($caseReminderTypeCreate['id']), 'Created entity has numeric id.');
+    $this->assertEquals(1, count($caseReminderTypeCreate['values']), 'One entity created.');
   }
 
 }

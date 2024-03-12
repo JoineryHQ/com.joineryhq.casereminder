@@ -1,6 +1,7 @@
 <?php
 
 use CRM_Casereminder_ExtensionUtil as E;
+use Civi\Token\TokenProcessor;
 
 /**
  * Form controller class
@@ -125,7 +126,7 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
         // field label
         E::ts('Subject'),
         // attributes
-        ['style' => 'width: 30rem;'],
+        ['style' => 'width: calc(30rem - 10em); float: left; margin-right: 1em;'],
         // is required
         TRUE
       );
@@ -176,6 +177,8 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
     CRM_Core_Resources::singleton()->addStyleFile('casereminder', 'css/CRM_Casereminder_Form_CaseReminderType.css');
     // Add js file
     CRM_Core_Resources::singleton()->addScriptFile('casereminder', 'js/CRM_Casereminder_Form_CaseReminderType.js');
+    
+    CRM_Mailing_BAO_Mailing::commonCompose($this);    
   }
 
   /**
@@ -352,4 +355,24 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
     return $caseValues;
   }
 
+  /**
+   * List available tokens for this form.
+   *
+   * @return array
+   */
+  public function listTokens() {
+    $tokenProcessor = new TokenProcessor(Civi::dispatcher(), ['schema' => $this->getTokenSchema()]);
+    return $tokenProcessor->listTokens();
+  }
+
+  /**
+   * Get the token processor schema required to list any tokens for this task.
+   *
+   * @return array
+   */
+  protected function getTokenSchema(): array {
+    return ['contactId'];
+  }
+
+  
 }

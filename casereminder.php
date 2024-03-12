@@ -3,6 +3,15 @@
 require_once 'casereminder.civix.php';
 
 use CRM_Casereminder_ExtensionUtil as E;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+
+/**
+ * Implements hook_civicrm_container().
+ */
+function casereminder_civicrm_container(ContainerBuilder $container) {
+  $container->findDefinition('dispatcher')->addMethodCall('addListener', ['civi.token.list', 'CRM_Casereminder_Listener::tokenRegister'])->setPublic(TRUE);
+  $container->findDefinition('dispatcher')->addMethodCall('addListener', ['civi.token.eval', 'CRM_Casereminder_Listener::tokenEval'])->setPublic(TRUE);
+}
 
 /**
  * Implements hook_civicrm_permission().

@@ -11,6 +11,7 @@ use CRM_Casereminder_ExtensionUtil as E;
  */
 function _civicrm_api3_case_reminder_type_create_spec(&$spec) {
   $spec['case_type_id']['api.required'] = 1;
+  $spec['case_type_id']['type'] = CRM_Utils_Type::T_STRING;
   $spec['msg_template_id']['api.required'] = 1;
   $spec['recipient_relationship_type_id']['api.required'] = 1;
   $spec['from_email_address']['api.required'] = 1;
@@ -29,16 +30,7 @@ function _civicrm_api3_case_reminder_type_create_spec(&$spec) {
  * @throws API_Exception
  */
 function civicrm_api3_case_reminder_type_create($params) {
-  $packedArrayStringParams = [
-    'case_status_id',
-    'recipient_relationship_type_id',
-  ];
-  foreach ($packedArrayStringParams as $packedArrayStringParam) {
-    if (isset($params[$packedArrayStringParam]) && is_array($params[$packedArrayStringParam])) {
-      $params[$packedArrayStringParam] = CRM_Utils_Array::implodePadded($params[$packedArrayStringParam]);
-    }
-  }
-
+  _civicrm_api3_case_reminder_type_format_params($params);
   return _civicrm_api3_basic_create(_civicrm_api3_get_BAO(__FUNCTION__), $params, 'CaseReminderType');
 }
 
@@ -68,4 +60,25 @@ function civicrm_api3_case_reminder_type_delete($params) {
  */
 function civicrm_api3_case_reminder_type_get($params) {
   return _civicrm_api3_basic_get(_civicrm_api3_get_BAO(__FUNCTION__), $params, TRUE, 'CaseReminderType');
+}
+
+function _civicrm_api3_case_reminder_type_format_params(&$params) {
+  $packedArrayStringParams = [
+    'case_status_id',
+    'recipient_relationship_type_id',
+  ];
+  foreach ($packedArrayStringParams as $packedArrayStringParam) {
+    if (isset($params[$packedArrayStringParam]) && is_array($params[$packedArrayStringParam])) {
+      $params[$packedArrayStringParam] = CRM_Utils_Array::implodePadded($params[$packedArrayStringParam]);
+    }
+  }
+
+  // api accepts case_type_id values as integer or string(name), but DB is expecting int.
+  $caseTypeIdIsInteger = filter_var($params['case_type_id'], FILTER_VALIDATE_INT);
+  if (!$caseTypeIdIsInteger) {
+    $params['case_type_id'] = civicrm_api3('CaseType', 'getvalue', [
+      'return' => "id",
+      'name' => $params['case_type_id'],
+    ]);
+  }
 }

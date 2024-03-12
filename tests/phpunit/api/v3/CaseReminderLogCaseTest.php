@@ -12,6 +12,7 @@ use Civi\Test\TransactionalInterface;
 class api_v3_CaseReminderLogCaseTest extends \PHPUnit\Framework\TestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
   use \Civi\Test\Api3TestTrait;
   use \Civi\Test\ContactTestTrait;
+  use CRM_CasereminderTestTrait;
 
   private $contactIds = [];
   private $caseReminderTypeId;
@@ -36,35 +37,21 @@ class api_v3_CaseReminderLogCaseTest extends \PHPUnit\Framework\TestCase impleme
   public function setUp(): void {
     $table = CRM_Core_DAO_AllCoreTables::getTableForEntityName('CaseReminderLogCase');
     $this->assertTrue($table && CRM_Core_DAO::checkTableExists($table), 'There was a problem with extension installation. Table for ' . 'CaseReminderLogCase' . ' not found.');
+
+    $this->setupCasereminderTests();
+
     parent::setUp();
 
     $this->contactIds['client'] = $this->individualCreate();
     $this->contactIds['creator']  = $this->individualCreate();
 
     // CareReminderLogCase requires an actual case reminder type, so create that now.
-    $caseReminderTypeApiParams = [
-      'case_type_id' => 1,
-      'case_status_id' => [1, 2],
-      'msg_template_id' => 1,
-      'recipient_relationship_type_id' => [-1, 14],
-      'from_email_address' => '"Micky Mouse"<mickey@mouse.example.com>',
-      'subject' => 'Test subject',
-      'dow' => 'monday',
-      'max_iterations' => '1000',
-      'is_active' => 1,
-    ];
-    $createCaseReminderType = $this->callAPISuccess('CaseReminderType', 'create', $caseReminderTypeApiParams);
-    $this->caseReminderTypeId = $createCaseReminderType['id'];
+    $created = $this->createCaseReminderType();
+    $this->caseReminderTypeId = $created['id'];
 
-    // CareReminderLogCase requires an actual case, so create that now.
-    $caseApiParams = [
-      'contact_id' => $this->contactIds['client'],
-      'creator_id' => $this->contactIds['creator'],
-      'case_type_id' => 'housing_support',
-      'subject' => "TESTING",
-    ];
-    $createCase = $this->callAPISuccess('Case', 'create', $caseApiParams);
-    $this->caseId = $createCase['id'];
+    // CaseReminderLogCase requires an actual case, so create that now.
+    $createdCase = $this->createCase($this->contactIds['creator'], $this->contactIds['creator']);
+    $this->caseId = $createdCase['id'];
   }
 
   /**

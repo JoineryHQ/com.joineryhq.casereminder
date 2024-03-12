@@ -11,6 +11,7 @@ use Civi\Test\TransactionalInterface;
  */
 class api_v3_CaseReminderLogTypeTest extends \PHPUnit\Framework\TestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
   use \Civi\Test\Api3TestTrait;
+  use CRM_CasereminderTestTrait;
 
   private $caseReminderTypeId;
 
@@ -33,6 +34,9 @@ class api_v3_CaseReminderLogTypeTest extends \PHPUnit\Framework\TestCase impleme
   public function setUp(): void {
     $table = CRM_Core_DAO_AllCoreTables::getTableForEntityName('CaseReminderLogType');
     $this->assertTrue($table && CRM_Core_DAO::checkTableExists($table), 'There was a problem with extension installation. Table for ' . 'CaseReminderLogType' . ' not found.');
+
+    $this->setupCasereminderTests();
+
     parent::setUp();
     // CareReminderLogCase requires an actual case reminder type, so create that now.
 
@@ -41,7 +45,7 @@ class api_v3_CaseReminderLogTypeTest extends \PHPUnit\Framework\TestCase impleme
       'case_status_id' => [1, 2],
       'msg_template_id' => 1,
       'recipient_relationship_type_id' => [-1, 14],
-      'from_email_address' => '"Micky Mouse"<mickey@mouse.example.com>',
+      'from_email_address' => '"Mickey Mouse"<mickey@mouse.example.com>',
       'subject' => 'Test subject',
       'dow' => 'monday',
       'max_iterations' => '1000',

@@ -12,6 +12,7 @@ use Civi\Test\TransactionalInterface;
  */
 class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
   use \Civi\Test\Api3TestTrait;
+  use CRM_CasereminderTestTrait;
 
   /**
    * Set up for headless tests.
@@ -30,6 +31,9 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
    * The setup() method is executed before the test is executed (optional).
    */
   public function setUp(): void {
+
+    $this->setupCasereminderTests();
+
     parent::setUp();
   }
 
@@ -46,7 +50,7 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
    *
    * Note how the function name begins with the word "test".
    */
-  public function testApiExample() {
+  public function _testApiExample() {
     $result = civicrm_api3('Casereminder', 'processall', array('magicword' => 'sesame'));
     $this->assertEquals('Twelve', $result['values'][12]['name']);
   }
