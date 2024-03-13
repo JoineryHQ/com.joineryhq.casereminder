@@ -9,8 +9,8 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * Implements hook_civicrm_container().
  */
 function casereminder_civicrm_container(ContainerBuilder $container) {
-  $container->findDefinition('dispatcher')->addMethodCall('addListener', ['civi.token.list', 'CRM_Casereminder_Listener::tokenRegister'])->setPublic(TRUE);
-  $container->findDefinition('dispatcher')->addMethodCall('addListener', ['civi.token.eval', 'CRM_Casereminder_Listener::tokenEval'])->setPublic(TRUE);
+  $container->findDefinition('dispatcher')->addMethodCall('addListener', ['civi.token.list', 'CRM_Casereminder_Util_Token::listenTokenList'])->setPublic(TRUE);
+  $container->findDefinition('dispatcher')->addMethodCall('addListener', ['civi.token.eval', 'CRM_Casereminder_Util_Token::listenTokenEval'])->setPublic(TRUE);
 }
 
 /**
