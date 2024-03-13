@@ -284,7 +284,7 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
     if (!isset($caseStatusValuesByTypeId)) {
       $caseStatusValuesByTypeId = [];
 
-      $caseStatusGet = $result = civicrm_api3('OptionValue', 'get', [
+      $caseStatusGet = $result = _casereminder_civicrmapi('OptionValue', 'get', [
         'sequential' => 1,
         'option_group_id' => "case_status",
         'is_active' => TRUE,
@@ -327,7 +327,7 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
     if (!isset($caseRoleValuesByTypeId)) {
       $caseRoleValuesByTypeId = [];
 
-      $relationshipTypeGet = $result = civicrm_api3('RelationshipType', 'get', [
+      $relationshipTypeGet = $result = _casereminder_civicrmapi('RelationshipType', 'get', [
         'sequential' => 1,
         'option_group_id' => "case_status",
         'is_active' => TRUE,

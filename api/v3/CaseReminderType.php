@@ -76,7 +76,7 @@ function _civicrm_api3_case_reminder_type_format_params(&$params) {
   // api accepts case_type_id values as integer or string(name), but DB is expecting int.
   $caseTypeIdIsInteger = filter_var($params['case_type_id'], FILTER_VALIDATE_INT);
   if (!$caseTypeIdIsInteger) {
-    $params['case_type_id'] = civicrm_api3('CaseType', 'getvalue', [
+    $params['case_type_id'] = _casereminder_civicrmapi('CaseType', 'getvalue', [
       'return' => "id",
       'name' => $params['case_type_id'],
     ]);

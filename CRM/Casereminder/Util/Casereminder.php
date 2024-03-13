@@ -79,7 +79,7 @@ class CRM_Casereminder_Util_Casereminder {
     foreach ($recipientCids as $recipientCid) {
       $sendingParams['contact_id'] = $recipientCid;
       CRM_Casereminder_Util_Token::setTokenEnvCaseId($caseId);
-      $emailSend = civicrm_api3('Email', 'send', $sendingParams);
+      $emailSend = _casereminder_civicrmapi('Email', 'send', $sendingParams);
       CRM_Casereminder_Util_Token::setTokenEnvCaseId(NULL);
     }
   }

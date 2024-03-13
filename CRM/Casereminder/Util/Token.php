@@ -90,7 +90,7 @@ class CRM_Casereminder_Util_Token {
     // Static to avoid redundant fetching.
     Civi::$statics[__METHOD__]['caseFields'] = [];
     if (empty(Civi::$statics[__METHOD__]['caseFields'])) {
-      $caseGetFields = civicrm_api3('Case', 'getfields', [
+      $caseGetFields = _casereminder_civicrmapi('Case', 'getfields', [
         'api_action' => "get",
         'options' => ['limit' => 0],
       ]);
