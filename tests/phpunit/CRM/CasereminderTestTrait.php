@@ -2,7 +2,7 @@
 
 trait CRM_CasereminderTestTrait {
 
-  private $now;
+  private CRM_Casereminder_Util_Time $now;
   
   protected $defaultCaseReminderTypeParams = [
     'case_type_id' => 'housing_support',
@@ -26,7 +26,7 @@ trait CRM_CasereminderTestTrait {
 
   protected function setupCasereminderTests() {
     // Define 'now' as tomorrow, to ensure we're not testing for system "now".
-    $this->now = CRM_Casereminder_Util_Time::singleton(strtotime('+1 day'));
+    $this->now = CRM_Casereminder_Util_Time::singleton('+1 day');
 
     // case is not enabled by default
     $enableResult = CRM_Core_BAO_ConfigSetting::enableComponent('CiviCase');

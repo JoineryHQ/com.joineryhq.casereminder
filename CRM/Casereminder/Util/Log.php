@@ -21,7 +21,6 @@ class CRM_Casereminder_Util_Log {
     _casereminder_civicrmapi('caseReminderLogType', 'create', [
       'case_reminder_type_id' => $caseReminderTypeId,
       'action' => $action,
-      'log_time' => CRM_Casereminder_Util_Time::singleton()->getMysqlDatetime(),
     ]);
   }
   
@@ -42,7 +41,6 @@ class CRM_Casereminder_Util_Log {
       'case_reminder_type_id' => $caseReminderTypeId,
       'case_id' => $caseId,
       'action' => $action,
-      'log_time' => CRM_Casereminder_Util_Time::singleton()->getMysqlDatetime(),
     ]);
   }
 }

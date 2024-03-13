@@ -24,6 +24,10 @@ function _civicrm_api3_case_reminder_log_type_create_spec(&$spec) {
  * @throws API_Exception
  */
 function civicrm_api3_case_reminder_log_type_create($params) {
+  if (empty($params['log_time'])) {
+    $now = CRM_Casereminder_Util_Time::singleton();
+    $params['log_time'] = $now->getMysqlDatetime();
+  }
   return _civicrm_api3_basic_create(_civicrm_api3_get_BAO(__FUNCTION__), $params, 'CaseReminderLogType');
 }
 

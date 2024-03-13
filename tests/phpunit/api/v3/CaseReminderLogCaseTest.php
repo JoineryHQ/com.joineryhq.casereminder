@@ -91,4 +91,15 @@ class api_v3_CaseReminderLogCaseTest extends \PHPUnit\Framework\TestCase impleme
     ]);
   }
 
+  public function testDefaultTimestamp(): void {
+    $apiParams = [
+      'case_reminder_type_id' => $this->caseReminderTypeId,
+      'case_id' => $this->caseId,
+      'action' => 'TESTING',
+    ];
+    $caseReminderLogCaseCreate = $this->callAPISuccess('CaseReminderLogCase', 'create', $apiParams);
+    $caseReminderLogCase = reset($caseReminderLogCaseCreate['values']);
+    $this->assertEquals($this->now->getMysqlDatetime(), $caseReminderLogCase['log_time'], 'Default log_time for CaseReminderLogCase is correct.');
+  }
+
 }

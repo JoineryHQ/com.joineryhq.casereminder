@@ -20,7 +20,7 @@ use CRM_Casereminder_ExtensionUtil as E;
  *
  * @group headless
  */
-class CRM_Casereminder_Util_CasereminderTest extends \PHPUnit\Framework\TestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
+class CRM_Casereminder_Util_Casereminder_HeadlessTest extends \PHPUnit\Framework\TestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
   use \Civi\Test\Api3TestTrait;
   use \Civi\Test\ContactTestTrait;
   use CRM_CasereminderTestTrait;
@@ -45,16 +45,10 @@ class CRM_Casereminder_Util_CasereminderTest extends \PHPUnit\Framework\TestCase
       ->apply();
   }
 
-  public function testFoo() {
-    $this->assertTrue(FALSE, 'False is true.');
-  }
-
   public function setUp():void {
 
     $this->setupCasereminderTests();
-
     parent::setUp();
-
     // Set now to tomorrow
     $this->tomorrow = new DateTime('@' . strtotime('+2 days'));
 
@@ -69,10 +63,6 @@ class CRM_Casereminder_Util_CasereminderTest extends \PHPUnit\Framework\TestCase
   }
 
   public function tearDown():void {
-    var_dump(__METHOD__);
-    $testDir = \Civi::paths()->getPath('[civicrm.root]/tests/events');
-    rename($testDir . '/hook_civicrm_alterMailParams.evch.php.bkp', $testDir . '/hook_civicrm_alterMailParams.evch.php');
-
     parent::tearDown();
   }
 
@@ -146,34 +136,53 @@ class CRM_Casereminder_Util_CasereminderTest extends \PHPUnit\Framework\TestCase
   public function testGetReminderTypeCasesHonorsIsDeleted() {
     // Create non-deleted case with type = 1
     $caseNotDeleted = $this->createCase($this->contactIds['creator'], $this->contactIds['client'], [
-      'case_type_id' => 1,
       'subject' => "TESTING:case not deleted",
     ]);
     // Create deleted case with type = 1
     $caseDeleted = $this->createCase($this->contactIds['creator'], $this->contactIds['client'], [
-      'case_type_id' => 1,
       'subject' => "TESTING:case deleted",
       'is_deleted' => 1,
     ]);
 
     // Create caseremindertype specifying case type 1.
-    $reminderTypeCase = $this->createCaseReminderType([
-      'case_type_id' => 1,
-      'subject' => 'Subject:case-type=1',
-    ]);
+    $reminderTypeCase = $this->createCaseReminderType();
     $reminderTypeCases = CRM_Casereminder_Util_Casereminder::getReminderTypeCases($reminderTypeCase);
-    $this->assertEquals(1, count($reminderTypeCases), 'One non-deleted case found');
+    $this->assertEquals(1, count($reminderTypeCases), 'One non-deleted case found?');
     $reminderTypeCase = reset($reminderTypeCases);
-    $this->assertEquals($caseNotDeleted['subject'], $reminderTypeCase['subject'], 'Reminder type subject is correct');
+    $this->assertEquals($caseNotDeleted['subject'], $reminderTypeCase['subject'], 'Non-deleted case was returned?');
   }
 
-  public function _testGetReminderTypeCases() {
+  public function testGetReminderTypeCasesHonorsStatus() {
+    // Create non-deleted case with status = 1
+    $caseStatus1 = $this->createCase($this->contactIds['creator'], $this->contactIds['client'], [
+      'status_id' => 1,
+      'subject' => "TESTING: status = 1",
+    ]);
+    // Create non-deleted case with status = 2
+    $caseStatus2 = $this->createCase($this->contactIds['creator'], $this->contactIds['client'], [
+      'status_id' => 2,
+      'subject' => "TESTING: status = 2",
+    ]);
+    // Create non-deleted case with status = 3
+    $caseStatus3 = $this->createCase($this->contactIds['creator'], $this->contactIds['client'], [
+      'status_id' => 3,
+      'subject' => "TESTING: status = 3",
+    ]);
+
+    // Create caseremindertype specifying stastus types 1, 2.
+    $reminderTypeCase = $this->createCaseReminderType([
+      'case_status_id' => [1, 2],
+      'subject' => 'Subject: case-status-type=[1,2]',
+    ]);
+    
     $reminderTypes = CRM_Casereminder_Util_Casereminder::getNowReminderTypes();
     $reminderType = reset($reminderTypes);
     $cases = CRM_Casereminder_Util_Casereminder::getReminderTypeCases($reminderType);
-    $this->assertEquals(1, count($cases), 'One case found for reminder type.');
-    $case = reset($cases);
-    $this->assertEquals('TESTING:housing_support', $case['subject'], 'Case subject is correct');
+    $this->assertEquals(2, count($cases), 'Two case found for reminder type with case_status_id=[1,2].');
+    $caseSubjects = CRM_Utils_Array::collect('subject', $cases);
+    $this->assertContains($caseStatus1['subject'], $caseSubjects, 'Case with status 1 was returned?');
+    $this->assertContains($caseStatus2['subject'], $caseSubjects, 'Case with status 2 was returned?');
+    $this->assertNotContains($caseStatus3['subject'], $caseSubjects, 'Case with status 3 was NOT returned?');
   }
 
   public function testBuildRecipientListIsCorrect() {
@@ -218,7 +227,7 @@ class CRM_Casereminder_Util_CasereminderTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($expected, $actual, 'Address specifier correctly split.');
   }
 
-  public function _testPrepCaseReminderSendingParams() {
+  public function testPrepCaseReminderSendingParams() {
     // create case
     $case = $this->createCase($this->contactIds['creator'], $this->contactIds['client'], [
       'case_type_id' => 1,
@@ -366,12 +375,53 @@ class CRM_Casereminder_Util_CasereminderTest extends \PHPUnit\Framework\TestCase
     $this->assertStringContainsString("Modified Date: {$latestCaseValues['modified_date']}", $mailingHtml, 'Mailing html tokens show correct case modified date.');
   }
 
-  public function reminderTypeCompletedToday($reminderType) {
-
+  public function testReminderTypeCompletedToday() {
+    // Active
+    $reminderType = $this->createCaseReminderType();
+    $completedTodayFalse = CRM_Casereminder_Util_Casereminder::reminderTypeCompletedToday($reminderType);
+    $this->assertFalse($completedTodayFalse, 'Freshly created reminder type is NOT completed today');
+    
+    $apiParams = [
+      'log_time' => $this->now->getMysqlDatetime(),
+      'case_reminder_type_id' => $reminderType['id'],
+      'action' => CRM_Casereminder_Util_Log::ACTION_REMINDER_TYPE_COMPLETE,
+    ];
+    
+    $created = $this->callAPISuccess('CaseReminderLogType', 'create', $apiParams);
+    
+    $completedTodayTrue = CRM_Casereminder_Util_Casereminder::reminderTypeCompletedToday($reminderType);
+    $this->assertTrue($completedTodayTrue, '"Completed"-logged reminder type IS completed today');
+    
   }
 
-  public function reminderTypeCaseNeededNow($reminderType, $case) {
+  public function testReminderTypeCaseSentToday() {
 
+    // CareReminderLogCase requires an actual case reminder type, so create that now.
+    $reminderType = $this->createCaseReminderType();
+
+    // CaseReminderLogCase requires an actual case, so create that now.
+    $caseSentToday = $this->createCase($this->contactIds['creator'], $this->contactIds['creator'], [
+      'subject' => 'TESTING: Case SentToday',
+    ]);
+    $caseSentYesterday = $this->createCase($this->contactIds['creator'], $this->contactIds['creator'], [
+      'subject' => 'TESTING: Case SentYesterday',
+    ]);
+    $caseNotSent = $this->createCase($this->contactIds['creator'], $this->contactIds['creator'], [
+      'subject' => 'TESTING: Case NotSent',
+    ]);
+    
+    // Log that a reminder was sent now for $caseSentToday.
+    $apiParams = [
+      'log_time' => $this->now->getMysqlDatetime(),
+      'case_reminder_type_id' => $reminderType['id'],
+      'case_id' => $caseSentToday['id'],
+      'action' => CRM_Casereminder_Util_Log::ACTION_CASE_SEND,
+    ];
+    $created = $this->callAPISuccess('CaseReminderLogCase', 'create', $apiParams);
+    
+    $this->assertTrue(CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($reminderType, $caseSentToday), 'Case sent today is returned?');
+    $this->assertFalse(CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($reminderType, $caseSentYesterday), 'Case sent yesterday is NOT returned?');
+    $this->assertFalse(CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($reminderType, $caseNotSent), 'Case not sent is NOT returned?');
   }
 
 }

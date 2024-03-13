@@ -119,10 +119,9 @@ class CRM_Casereminder_Util_Casereminder {
   }
 
   /**
-   * Should the given reminderType be processed today? (e.g.
-   * if this remindertype has already been processed today, this would return FALSE).
+   * Has the given reminderType been processed today?
    *
-   * @param type $reminderType
+   * @param array $reminderType as returned, e.g. by caseReminderType.getSingle api
    * @return boolean
    */
   public static function reminderTypeCompletedToday($reminderType) : bool {
@@ -135,6 +134,7 @@ class CRM_Casereminder_Util_Casereminder {
       'case_reminder_type_id' => $reminderType['id'],
       'action' => CRM_Casereminder_Util_Log::ACTION_REMINDER_TYPE_COMPLETE,
     ];
+    $caseReminderLogTypeGet = _casereminder_civicrmapi('CaseReminderLogType', 'get', $apiParams);
     $caseReminderLogTypeCount = _casereminder_civicrmapi('CaseReminderLogType', 'getcount', $apiParams);
     if ($caseReminderLogTypeCount) {
       // "Completed" log entry found today; reminderType is not needed now.
@@ -144,22 +144,15 @@ class CRM_Casereminder_Util_Casereminder {
   }
 
   /**
-   * Should the given case receive a reminder for the given reminderType, now?
-   * (e.g. business rules may indicate that a reminderType should not be processed
-   * that a case should never receive a reminder for the same reminderType twice
-   * in the same day, so if this case has already been sent a reminder for this
-   * reminderType today, this would return FALSE).
-   *
-   * FIXME: STUB
+   * Was the given case sent a reminder for the given reminderType, today?
    *
    * @param array $reminderType As returned by e.g. api caseReminderType.getSingle
    * @param array $case As returned by e.g. api case.getSingle
    * @return boolean
    */
   public static function reminderTypeCaseSentToday($reminderType, $case) : bool {
-    // We don't process reminderTypes twice on the same date.
-    // So check whether this reminderType has been COMPLETED today.
-
+    // We don't send multiplereminders of the same ReminderType for the same case twice on the same date.
+    // So check whether this reminderType has been used to send a reminder for this case today.
     $todayRange = CRM_Casereminder_Util_Time::singleton()->getTodayRange();
     $apiParams = [
       'log_time' => ['BETWEEN' => $todayRange],

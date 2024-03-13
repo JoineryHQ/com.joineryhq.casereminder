@@ -21,11 +21,8 @@ class CRM_Casereminder_Util_Time {
   /**
    * The constructor. Use self::singleton() to create an instance.
    */
-  private function __construct($timestamp = NULL) {
-    if ($timestamp) {
-      $timestamp = '@'. $timestamp;
-    }
-    $this->now = new DateTime($timestamp);
+  private function __construct($dateTime = "now") {
+    $this->now = new DateTime($dateTime);
   }
 
   /**
@@ -45,7 +42,7 @@ class CRM_Casereminder_Util_Time {
   }
 
   public function getMysqlDatetime() : string {
-    return $this->now->format('Y-m-d H:i:s');
+    return $this->now->format('YmdHis');
   }
 
   public function getDayOfWeek() : string {
