@@ -3,7 +3,7 @@
 trait CRM_CasereminderTestTrait {
 
   private CRM_Casereminder_Util_Time $now;
-  
+
   protected $defaultCaseReminderTypeParams = [
     'case_type_id' => 'housing_support',
     'case_status_id' => [1, 2],
@@ -12,7 +12,7 @@ trait CRM_CasereminderTestTrait {
     'from_email_address' => '"Mickey Mouse"<mickey@mouse.example.com>',
     'subject' => 'Test subject',
     'dow' => 'monday',
-    'max_iterations' => '1000',
+    'max_iterations' => '',
     'is_active' => 1,
   ];
 
@@ -51,7 +51,7 @@ trait CRM_CasereminderTestTrait {
     $this->assertTrue(is_numeric($created['id']));
     return $created['values'][$created['id']];
   }
-  
+
   protected function addCaseRoleContact (int $caseId, int $caseContactId, int $relationshipTypeId, int $contactId) {
     // Seems unwise, but do it anyway: set vars directly in REQUEST.
     $_REQUEST['case_id'] = $caseId;
@@ -60,6 +60,7 @@ trait CRM_CasereminderTestTrait {
     $_REQUEST['rel_contact'] = $contactId;
     $_REQUEST['is_unit_test'] = 1;
 
-    CRM_Contact_Page_AJAX::relationship();    
+    CRM_Contact_Page_AJAX::relationship();
   }
+
 }

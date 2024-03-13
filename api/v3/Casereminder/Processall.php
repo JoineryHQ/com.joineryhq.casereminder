@@ -43,7 +43,7 @@ function civicrm_api3_casereminder_Processall($params) {
       foreach ($reminderTypeCases as $reminderTypeCase) {
         if (
           !CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($nowReminderType, $reminderTypeCase)
-//          && (FIXME: honor max_iterations.)
+          && !CRM_Casereminder_Util_Casereminder::reminderTypeCaseReachedMaxIterations($nowReminderType, $reminderTypeCase)
         ) {
           $recipientCids = CRM_Casereminder_Util_Casereminder::buildRecipientList($case, $reminderType);
           $sendingParams = CRM_Casereminder_Util_Casereminder::prepCaseReminderSendingParams($reminderTypeCase, $nowReminderType);

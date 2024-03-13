@@ -259,17 +259,56 @@ class CRM_Casereminder_Util_Casereminder_HeadlessTest extends \PHPUnit\Framework
     $completedTodayFalse = CRM_Casereminder_Util_Casereminder::reminderTypeCompletedToday($reminderType);
     $this->assertFalse($completedTodayFalse, 'Freshly created reminder type is NOT completed today');
 
-    $apiParams = [
-      'log_time' => $this->now->getMysqlDatetime(),
-      'case_reminder_type_id' => $reminderType['id'],
-      'action' => CRM_Casereminder_Util_Log::ACTION_REMINDER_TYPE_COMPLETE,
-    ];
+    CRM_Casereminder_Util_Log::logReminderType($reminderType['id'], CRM_Casereminder_Util_Log::ACTION_REMINDER_TYPE_BEGIN);
+    $completedTodayFalse = CRM_Casereminder_Util_Casereminder::reminderTypeCompletedToday($reminderType);
+    $this->assertFalse($completedTodayFalse, 'Reminder type log BEGIN today is NOT COMPLETE today');
 
-    $created = $this->callAPISuccess('CaseReminderLogType', 'create', $apiParams);
-
+    CRM_Casereminder_Util_Log::logReminderType($reminderType['id'], CRM_Casereminder_Util_Log::ACTION_REMINDER_TYPE_COMPLETE);
     $completedTodayTrue = CRM_Casereminder_Util_Casereminder::reminderTypeCompletedToday($reminderType);
     $this->assertTrue($completedTodayTrue, '"Completed"-logged reminder type IS completed today');
 
+  }
+
+  public function testReminderTypeCaseReachedMaxIterations() {
+    $case = $this->createCase($this->contactIds['creator'], $this->contactIds['client'], []);
+
+    $reminderTypeDefault = $this->createCaseReminderType([]);
+    $reachedMax = CRM_Casereminder_Util_Casereminder::reminderTypeCaseReachedMaxIterations($reminderTypeDefault, $case);
+    $this->assertFalse($reachedMax, 'Remindertype with max_iterations="" DOES NOT have max iterations?');
+
+    $reminderTypeMaxZero = $this->createCaseReminderType([
+      'max_iterations' => '0',
+    ]);
+    $reachedMax = CRM_Casereminder_Util_Casereminder::reminderTypeCaseReachedMaxIterations($reminderTypeMaxZero, $case);
+    $this->assertFalse($reachedMax, 'Remindertype with max_iterations="0" DOES NOT have max iterations?');
+
+    $reminderTypeMaxOne = $this->createCaseReminderType([
+      'max_iterations' => '1',
+    ]);
+    $reachedMax = CRM_Casereminder_Util_Casereminder::reminderTypeCaseReachedMaxIterations($reminderTypeMaxOne, $case);
+    $this->assertFalse($reachedMax, 'Fresh Remindertype with max_iterations="1" DOES NOT have max iterations?');
+
+    CRM_Casereminder_Util_Log::logReminderCase($reminderTypeMaxOne['id'], CRM_Casereminder_Util_Log::ACTION_CASE_SEND, $case['id']);
+    $reachedMax = CRM_Casereminder_Util_Casereminder::reminderTypeCaseReachedMaxIterations($reminderTypeMaxOne, $case);
+    $this->assertTrue($reachedMax, 'Remindertype with max_iterations="1" and 1 log DOES have max iterations?');
+
+    CRM_Casereminder_Util_Log::logReminderCase($reminderTypeMaxOne['id'], CRM_Casereminder_Util_Log::ACTION_CASE_SEND, $case['id']);
+    $reachedMax = CRM_Casereminder_Util_Casereminder::reminderTypeCaseReachedMaxIterations($reminderTypeMaxOne, $case);
+    $this->assertTrue($reachedMax, 'Remindertype with max_iterations="1" and 2 log DOES have max iterations?');
+
+    $reminderTypeMaxTwo = $this->createCaseReminderType([
+      'max_iterations' => '2',
+    ]);
+    $reachedMax = CRM_Casereminder_Util_Casereminder::reminderTypeCaseReachedMaxIterations($reminderTypeMaxTwo, $case);
+    $this->assertFalse($reachedMax, 'Fresh Remindertype with max_iterations="2" DOES NOT have max iterations?');
+
+    CRM_Casereminder_Util_Log::logReminderCase($reminderTypeMaxTwo['id'], CRM_Casereminder_Util_Log::ACTION_CASE_SEND, $case['id']);
+    $reachedMax = CRM_Casereminder_Util_Casereminder::reminderTypeCaseReachedMaxIterations($reminderTypeMaxTwo, $case);
+    $this->assertFalse($reachedMax, 'Remindertype with max_iterations="2" and 1 log DOES NOT have max iterations?');
+
+    CRM_Casereminder_Util_Log::logReminderCase($reminderTypeMaxTwo['id'], CRM_Casereminder_Util_Log::ACTION_CASE_SEND, $case['id']);
+    $reachedMax = CRM_Casereminder_Util_Casereminder::reminderTypeCaseReachedMaxIterations($reminderTypeMaxTwo, $case);
+    $this->assertTrue($reachedMax, 'Remindertype with max_iterations="2" and 2 log DOES NOT have max iterations?');
   }
 
   public function testReminderTypeCaseSentToday() {

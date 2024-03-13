@@ -186,4 +186,23 @@ class CRM_Casereminder_Util_Casereminder {
     return $ret;
   }
 
+  public static function reminderTypeCaseReachedMaxIterations($reminderType, $case) {
+    $maxIterations = $reminderType['max_iterations'];
+
+    // If maxiterations is empty or 0, we'll never reach it, so return false.
+    if (empty($maxIterations)) {
+      return FALSE;
+    }
+
+    // Maxiterations must be some number, so we need to count the logs and compare.
+    $apiParams = [
+      'case_reminder_type_id' => $reminderType['id'],
+      'case_id' => $case['id'],
+      'action' => CRM_Casereminder_Util_Log::ACTION_CASE_SEND,
+    ];
+    $caseReminderLogCaseCount = _casereminder_civicrmapi('CaseReminderLogCase', 'getcount', $apiParams);
+    return ($caseReminderLogCaseCount >= $maxIterations);
+
+  }
+
 }
