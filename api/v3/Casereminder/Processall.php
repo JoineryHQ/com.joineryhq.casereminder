@@ -48,7 +48,6 @@ function civicrm_api3_casereminder_Processall($params) {
           $recipientCids = CRM_Casereminder_Util_Casereminder::buildRecipientList($case, $reminderType);
           $sendingParams = CRM_Casereminder_Util_Casereminder::prepCaseReminderSendingParams($reminderTypeCase, $nowReminderType);
           CRM_Casereminder_Util_Casereminder::sendCaseReminder($case['id'], $recipientCids, $sendingParams);
-          CRM_Casereminder_Util_Log::logReminderCase($nowReminderType['id'], CRM_Casereminder_Util_Log::ACTION_CASE_SEND, $reminderTypeCase['id']);
         }
       }
       CRM_Casereminder_Util_Log::logReminderType($nowReminderType['id'], CRM_Casereminder_Util_Log::ACTION_REMINDER_TYPE_COMPLETE);

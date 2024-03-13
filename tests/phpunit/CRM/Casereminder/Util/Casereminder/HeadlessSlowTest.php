@@ -7,7 +7,7 @@ use Civi\Test\TransactionalInterface;
 use CRM_Casereminder_ExtensionUtil as E;
 
 /**
- * This test class is slow because setup() clears civicrm cache at least twice: 
+ * This test class is slow because setup() clears civicrm cache at least twice:
  * to enable an extension, and to set a setting.
  *
  * Tips:
@@ -148,11 +148,20 @@ class CRM_Casereminder_Util_Casereminder_HeadlessSlowTest extends \PHPUnit\Frame
     // tokens are processed, so we want these values now.)
     $latestCaseValues = civicrm_api3('case', 'getSingle', ['id' => $case['id']]);
 
+    // Verify that no log entry exists for this in CaseReminderLogCase.
+    // Later we'll verify that there's exactly 1.
+    $caseReminderLogCaseGetCount = $this->callAPISuccess('CaseReminderLogCase', 'getcount', [
+      'case_reminder_type_id' => $reminderType['id'],
+      'case_id' => $case['id'],
+      'action' => CRM_Casereminder_Util_Log::ACTION_CASE_SEND,
+    ]);
+    $this->assertEquals(0, $caseReminderLogCaseGetCount, 'Before sending, no CaseReminderLogCase log entry found for this case/remindertype?');
+
     /* Send case reminders.
      * NOTE: This will fail if we don't properly alter lines in other people's code.
      * See TESTING.md.
      */
-    CRM_Casereminder_Util_Casereminder::sendCaseReminder($case['id'], $recipientCids, $sendingParams);
+    CRM_Casereminder_Util_Casereminder::sendCaseReminder($case['id'], $reminderType['id'], $recipientCids, $sendingParams);
 
     $mailingGetDefaultParams = [
       'sequential' => 1,
@@ -184,6 +193,14 @@ class CRM_Casereminder_Util_Casereminder_HeadlessSlowTest extends \PHPUnit\Frame
     $mailingHtml = $mailing['body_html'];
     $this->assertStringContainsString("msgTplBodyMarker:{$msgTplBodyMarker}|", $mailingHtml, 'Mailing html contains $msgTplBodyMarker?');
     $this->assertStringContainsString("Case Subject: {$caseSubjectMarker}|", $mailingHtml, 'Mailing html was processed for tokens (case.subject token matched)?');
+
+    // Verify there's exactly one log entry for this in CaseReminderLogCase.
+    $caseReminderLogCaseGetCount = $this->callAPISuccess('CaseReminderLogCase', 'getcount', [
+      'case_reminder_type_id' => $reminderType['id'],
+      'case_id' => $case['id'],
+      'action' => CRM_Casereminder_Util_Log::ACTION_CASE_SEND,
+    ]);
+    $this->assertEquals(1, $caseReminderLogCaseGetCount, 'After sending, exactly 1 CaseReminderLogCase log entry found for this case/remindertype?');
   }
-  
+
 }

@@ -70,18 +70,20 @@ class CRM_Casereminder_Util_Casereminder {
   /**
    * Send a reminder of a given type for a given case.
    * @param int $caseId ID of the case.
+   * @param int $reminderTypeId ID of the reminderType.
    * @param array $recipientCids List of contactIds for recipients.
    * @param array $sendingParams As returned by e.g. self::prepCaseReminderSendingParams().
    *
    * @return void
    */
-  public static function sendCaseReminder($caseId, $recipientCids, $sendingParams) {
+  public static function sendCaseReminder($caseId, $reminderTypeId, $recipientCids, $sendingParams) {
     foreach ($recipientCids as $recipientCid) {
       $sendingParams['contact_id'] = $recipientCid;
       CRM_Casereminder_Util_Token::setTokenEnvCaseId($caseId);
       $emailSend = _casereminder_civicrmapi('Email', 'send', $sendingParams);
       CRM_Casereminder_Util_Token::setTokenEnvCaseId(NULL);
     }
+    CRM_Casereminder_Util_Log::logReminderCase($reminderTypeId, CRM_Casereminder_Util_Log::ACTION_CASE_SEND, $caseId);
   }
 
   public static function buildRecipientList($case, $reminderType) {
