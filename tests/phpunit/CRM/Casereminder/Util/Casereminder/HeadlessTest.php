@@ -174,7 +174,7 @@ class CRM_Casereminder_Util_Casereminder_HeadlessTest extends \PHPUnit\Framework
       'case_status_id' => [1, 2],
       'subject' => 'Subject: case-status-type=[1,2]',
     ]);
-    
+
     $reminderTypes = CRM_Casereminder_Util_Casereminder::getNowReminderTypes();
     $reminderType = reset($reminderTypes);
     $cases = CRM_Casereminder_Util_Casereminder::getReminderTypeCases($reminderType);
@@ -258,6 +258,16 @@ class CRM_Casereminder_Util_Casereminder_HeadlessTest extends \PHPUnit\Framework
   }
 
   public function testSendCaseReminder() {
+    /* This test relies on code in another extension (emailapi), which is known
+     * to produce testing errors unless patched. Therefore we'll skip it if
+     * the environment variable CASEREMINDER_TESTING_SKIP_EXTERNAL. For more
+     * information, see TESTING.md.
+     */
+    if (!getenv('CASEREMINDER_TESTING_COVER_EXTERNAL')) {
+      $this->addWarning("CASEREMINDER_TESTING_COVER_EXTERNAL is NOT set; this test has been skipped. See TESTING.md");
+      return;
+    }
+
     $msgTplSubjectMarker = uniqid();
     $caseSubjectMarker = uniqid();
     $reminderTypeSubjectMarker = uniqid();
@@ -326,14 +336,8 @@ class CRM_Casereminder_Util_Casereminder_HeadlessTest extends \PHPUnit\Framework
     $latestCaseValues = civicrm_api3('case', 'getSingle', ['id' => $case['id']]);
 
     /* Send case reminders.
-     * NOTE: This will fail if we don't properly alter these lines in other people's code:
-     *   [civicrm-extensions]/org.civicoop.emailapi/api/v3/Email/Send.php, function civicrm_api3_email_send() (around line 150 at time of writing):
-     *      Add null coallescing operator `??` or otherwise deal witn E_NOTICE 'undefined index' $contact['is_deleted'].
-     * - [civicrm-core]/tests/events/hook_civicrm_alterMailParams.evch.php, function hook_civicrm_alterMailParams():
-     *      emailapi extension uses non-standard parameters, and this core civicrm test is (somehow?) picking
-     *      up on that and throwing an exception with message "... Unrecognized keys ...". It's a lack of
-     *      knowledge on my part, but the only way I can get my test here to run without that exception
-     *      is to comment out (or early-return at the top of) that function.
+     * NOTE: This will fail if we don't properly alter lines in other people's code.
+     * See TESTING.md.
      */
     CRM_Casereminder_Util_Casereminder::sendCaseReminder($case['id'], $recipientCids, $sendingParams);
 
@@ -380,18 +384,18 @@ class CRM_Casereminder_Util_Casereminder_HeadlessTest extends \PHPUnit\Framework
     $reminderType = $this->createCaseReminderType();
     $completedTodayFalse = CRM_Casereminder_Util_Casereminder::reminderTypeCompletedToday($reminderType);
     $this->assertFalse($completedTodayFalse, 'Freshly created reminder type is NOT completed today');
-    
+
     $apiParams = [
       'log_time' => $this->now->getMysqlDatetime(),
       'case_reminder_type_id' => $reminderType['id'],
       'action' => CRM_Casereminder_Util_Log::ACTION_REMINDER_TYPE_COMPLETE,
     ];
-    
+
     $created = $this->callAPISuccess('CaseReminderLogType', 'create', $apiParams);
-    
+
     $completedTodayTrue = CRM_Casereminder_Util_Casereminder::reminderTypeCompletedToday($reminderType);
     $this->assertTrue($completedTodayTrue, '"Completed"-logged reminder type IS completed today');
-    
+
   }
 
   public function testReminderTypeCaseSentToday() {
@@ -409,7 +413,7 @@ class CRM_Casereminder_Util_Casereminder_HeadlessTest extends \PHPUnit\Framework
     $caseNotSent = $this->createCase($this->contactIds['creator'], $this->contactIds['creator'], [
       'subject' => 'TESTING: Case NotSent',
     ]);
-    
+
     // Log that a reminder was sent now for $caseSentToday.
     $apiParams = [
       'log_time' => $this->now->getMysqlDatetime(),
@@ -418,7 +422,7 @@ class CRM_Casereminder_Util_Casereminder_HeadlessTest extends \PHPUnit\Framework
       'action' => CRM_Casereminder_Util_Log::ACTION_CASE_SEND,
     ];
     $created = $this->callAPISuccess('CaseReminderLogCase', 'create', $apiParams);
-    
+
     $this->assertTrue(CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($reminderType, $caseSentToday), 'Case sent today is returned?');
     $this->assertFalse(CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($reminderType, $caseSentYesterday), 'Case sent yesterday is NOT returned?');
     $this->assertFalse(CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($reminderType, $caseNotSent), 'Case not sent is NOT returned?');
