@@ -7,8 +7,6 @@ use Civi\Test\TransactionalInterface;
 use CRM_Casereminder_ExtensionUtil as E;
 
 /**
- * FIXME - Add test description.
- *
  * Tips:
  *  - With HookInterface, you may implement CiviCRM hooks directly in the test class.
  *    Simply create corresponding functions (e.g. "hook_civicrm_post(...)" or similar).

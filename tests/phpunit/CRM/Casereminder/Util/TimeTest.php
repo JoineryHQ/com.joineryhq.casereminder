@@ -7,8 +7,6 @@ use Civi\Test\HookInterface;
 use Civi\Test\TransactionalInterface;
 
 /**
- * FIXME - Add test description.
- *
  * Tips:
  *  - With HookInterface, you may implement CiviCRM hooks directly in the test class.
  *    Simply create corresponding functions (e.g. "hook_civicrm_post(...)" or similar).
@@ -59,7 +57,7 @@ class CRM_Casereminder_Util_TimeTest extends \PHPUnit\Framework\TestCase impleme
     $modifiedTimestamp = $now->getTimestamp();
     $diffSeconds = ($modifiedTimestamp - $originalTimestamp);
     $this->assertEquals(86400, $diffSeconds, 'After incrementing time by "+1 day", timestasmp is exactly 24 hours in future?');
-    
+
     // modify() works with repeated increments?
     $now->modify('+1 day');
     $modifiedTimestamp = $now->getTimestamp();
@@ -70,7 +68,7 @@ class CRM_Casereminder_Util_TimeTest extends \PHPUnit\Framework\TestCase impleme
     $now->revert();
     $revetedTimestamp = $now->getTimestamp();
     $this->assertEquals($originalTimestamp, $revetedTimestamp, 'Reverted timestamp matches original timestamp?');
-    
+
     // reinitialize() wipes an previous 'reset' point and starts with new given time?
     // Test that reinitialization works as expected, with "+10 days" time.
     $now->reinitialize('+10 days');
@@ -84,7 +82,7 @@ class CRM_Casereminder_Util_TimeTest extends \PHPUnit\Framework\TestCase impleme
     $modifiedTimestamp = $now->getTimestamp();
     $diffSeconds = ($modifiedTimestamp - $reinitializedTimestamp);
     $this->assertEquals(86400, $diffSeconds, 'After incrementing time by "+1 day", timestasmp is exactly 24 hours in future, from reinitialized time?');
-    
+
     // Reinitialized time, after being modified, reverts to the reinitialized time (i.e. '+10 days' after $currentTimestamp.)
     $now->revert();
     $revetedTimestamp = $now->getTimestamp();
@@ -94,9 +92,6 @@ class CRM_Casereminder_Util_TimeTest extends \PHPUnit\Framework\TestCase impleme
     $now->reinitialize();
     $reinitializedTimestamp = $now->getTimestamp();
     $this->assertEquals(time(), $reinitializedTimestamp, 'After reinitialize to empty time ("now"), timestasmp is exactly now?');
-    
-
-    
   }
 
 }

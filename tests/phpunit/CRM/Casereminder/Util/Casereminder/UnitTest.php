@@ -1,14 +1,9 @@
 <?php
 
 use Civi\Test\CiviEnvBuilder;
-use Civi\Test\HeadlessInterface;
-use Civi\Test\HookInterface;
-use Civi\Test\TransactionalInterface;
 use CRM_Casereminder_ExtensionUtil as E;
 
 /**
- * FIXME - Add test description.
- *
  * Tips:
  *  - With HookInterface, you may implement CiviCRM hooks directly in the test class.
  *    Simply create corresponding functions (e.g. "hook_civicrm_post(...)" or similar).
@@ -56,4 +51,5 @@ class CRM_Casereminder_Util_Casereminder_CasereminderUnitTest extends \PHPUnit\F
     $actual = CRM_Casereminder_Util_Casereminder::splitFromEmail($email);
     $this->assertEquals($expected, $actual, 'Address specifier correctly split.');
   }
+
 }

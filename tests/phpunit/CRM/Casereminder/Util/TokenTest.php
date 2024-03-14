@@ -7,8 +7,6 @@ use Civi\Test\HookInterface;
 use Civi\Test\TransactionalInterface;
 
 /**
- * FIXME - Add test description.
- *
  * Tips:
  *  - With HookInterface, you may implement CiviCRM hooks directly in the test class.
  *    Simply create corresponding functions (e.g. "hook_civicrm_post(...)" or similar).
@@ -71,7 +69,7 @@ class CRM_Casereminder_Util_TokenTest extends \PHPUnit\Framework\TestCase implem
       'subject' => $caseSubjectMarker,
       'end_date' => $caseEndDate,
     ]);
-    
+
     // Hardcoded list of token names. Tokens should support custom fields, too,
     // but we're not testing those at present.
     $myTokenNames = [
@@ -87,7 +85,7 @@ class CRM_Casereminder_Util_TokenTest extends \PHPUnit\Framework\TestCase implem
     ];
     // Case may have been modified, so get latest case values (including modified_date, which seems volatile).
     $case = civicrm_api3('case', 'getSingle', ['id' => $case['id'], 'return' => $myTokenNames]);
-    
+
     // Set token environment.
     CRM_Casereminder_Util_Token::setTokenEnvCaseId($case['id']);
     // Get token values.
@@ -104,7 +102,7 @@ class CRM_Casereminder_Util_TokenTest extends \PHPUnit\Framework\TestCase implem
       'modified_date' => CRM_Utils_Date::customFormat($case['modified_date']),
     ];
     $expectedCaseTokenValues = array_merge($case, $caseFormattedValues);
-    
+
     // Ensure token values are as expected.
     $this->assertEquals($expectedCaseTokenValues, $tokenValuesNow);
   }
