@@ -265,7 +265,8 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
         'sequential' => 1,
         'return' => ["definition"],
         'is_active' => TRUE,
-      ], ['limit' => 0]);
+        'options' => ['limit' => 0],
+      ]);
       foreach ($caseTypeGet['values'] as $value) {
         $ret[$value['id']] = $value['definition'];
       }
