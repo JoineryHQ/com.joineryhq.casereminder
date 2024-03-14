@@ -37,6 +37,14 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
    * The setup() method is executed before the test is executed (optional).
    */
   public function setUp(): void {
+    /* All tests in this class require CASEREMINDER_TESTING_SKIP_EXTERNAL.
+     * So if it's not enabled, skip the expensive setup.
+     * For more information, see TESTING.md.
+     */
+    if (!getenv('CASEREMINDER_TESTING_COVER_EXTERNAL')) {
+      return;
+    }
+
     parent::setUp();
 
     $this->setupCasereminderTests();
@@ -79,6 +87,17 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
    *
    */
   public function testProcessAllOverTime() {
+    /* This test calls api casereminder.process all, which means that it
+     * relies on code in another extension (emailapi), which is known
+     * to produce testing errors unless patched. Therefore we'll skip it if
+     * the environment variable CASEREMINDER_TESTING_SKIP_EXTERNAL. For more
+     * information, see TESTING.md.
+     */
+    if (!getenv('CASEREMINDER_TESTING_COVER_EXTERNAL')) {
+      $this->addWarning("CASEREMINDER_TESTING_COVER_EXTERNAL is NOT set; this test has been skipped. See TESTING.md");
+      return;
+    }
+
     $nowReminderTypes = CRM_Casereminder_Util_Casereminder::getNowReminderTypes();
     $this->assertEquals(2, count($nowReminderTypes), 'After setup(): Two nowReminderTypes found?');
     $nowReminderTypeIds = array_keys($nowReminderTypes);
@@ -147,6 +166,17 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
   }
 
   public function testProcessAllReturnValuesBrief() {
+    /* This test calls api casereminder.process all, which means that it
+     * relies on code in another extension (emailapi), which is known
+     * to produce testing errors unless patched. Therefore we'll skip it if
+     * the environment variable CASEREMINDER_TESTING_SKIP_EXTERNAL. For more
+     * information, see TESTING.md.
+     */
+    if (!getenv('CASEREMINDER_TESTING_COVER_EXTERNAL')) {
+      $this->addWarning("CASEREMINDER_TESTING_COVER_EXTERNAL is NOT set; this test has been skipped. See TESTING.md");
+      return;
+    }
+
     $apiResult = $this->callAPISuccess('Casereminder', 'processAll');
     $expected = [
       'reminderTypesProcessed' => 2,
@@ -157,6 +187,17 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
   }
 
   public function testProcessAllReturnValuesVerbose() {
+    /* This test calls api casereminder.process all, which means that it
+     * relies on code in another extension (emailapi), which is known
+     * to produce testing errors unless patched. Therefore we'll skip it if
+     * the environment variable CASEREMINDER_TESTING_SKIP_EXTERNAL. For more
+     * information, see TESTING.md.
+     */
+    if (!getenv('CASEREMINDER_TESTING_COVER_EXTERNAL')) {
+      $this->addWarning("CASEREMINDER_TESTING_COVER_EXTERNAL is NOT set; this test has been skipped. See TESTING.md");
+      return;
+    }
+
     $apiResult = $this->callAPISuccess('Casereminder', 'processAll', ['verbose' => TRUE]);
     //  NOTE: $restult['values'] SHOULD look something like the following:
     //  $restult['values'] = [

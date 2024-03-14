@@ -47,6 +47,13 @@ class CRM_Casereminder_Util_Casereminder_HeadlessSlowTest extends \PHPUnit\Frame
   }
 
   public function setUp():void {
+    /* All tests in this class require CASEREMINDER_TESTING_SKIP_EXTERNAL.
+     * So if it's not enabled, skip the expensive setup.
+     * For more information, see TESTING.md.
+     */
+    if (!getenv('CASEREMINDER_TESTING_COVER_EXTERNAL')) {
+      return;
+    }
 
     $this->setupCasereminderTests();
     parent::setUp();
