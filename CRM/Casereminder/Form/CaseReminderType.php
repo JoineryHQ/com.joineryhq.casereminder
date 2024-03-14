@@ -39,7 +39,7 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
         'msg_template_id' => NULL,
         'recipient_relationship_type_id' => NULL,
         'from_email_address' => NULL,
-        'subject' => NULL,
+        'subject' => E::ts('This subject will be used in place of any subject line configured for the selected Message Template.'),
         'dow' => NULL,
         'max_iterations' => E::ts('Maximum number of times to send this reminder on any given case. If this is blank (or 0), no such limitation will be enforced.'),
         'is_active' => NULL,

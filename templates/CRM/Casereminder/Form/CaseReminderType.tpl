@@ -14,16 +14,19 @@
 {foreach from=$elementNames item=elementName}
   <div class="crm-section casereminder-element-{$elementName}">
     <div class="label">{$form.$elementName.label}</div>
-    <div class="content">{$form.$elementName.html}<div class="description">{$descriptions.$elementName}</div></div>
-    {if $elementName == 'subject'}
-      <input class="crm-token-selector eight" data-field="subject" />
-      {help id="id-token-subject" tplFile=$tplFile isAdmin=$isAdmin file="CRM/Contact/Form/Task/Email.hlp"}
-      {* div#editMessageDetails does nothing but is required by JS code in 
-       * CRM/Mailing/Form/InsertTokens.tpl (included below), which drives the
-       * token input functionality.
-       *}
-      <div id="editMessageDetails"></div>
-    {/if}
+    <div class="content">{$form.$elementName.html}
+      {if $elementName == 'subject'}
+        <input class="crm-token-selector eight" data-field="subject" />
+        {help id="id-token-subject" tplFile=$tplFile isAdmin=$isAdmin file="CRM/Contact/Form/Task/Email.hlp"}
+        {* div#editMessageDetails does nothing but is required by JS code in
+         * CRM/Mailing/Form/InsertTokens.tpl (included below), which drives the
+         * token input functionality.
+         *}
+        <div id="editMessageDetails"></div>
+        <div class="clear"></div>
+      {/if}
+      <div class="description">{$descriptions.$elementName}</div>
+    </div>
     <div class="clear"></div>
   </div>
 {/foreach}
