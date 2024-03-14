@@ -23,22 +23,37 @@ class CRM_Casereminder_Util_Time {
 
   /**
    * The constructor. Use self::singleton() to create an instance.
+   *
+   * @param string $datetime A date/time string, suitable as first argument to php's DateTime().
    */
-  private function __construct($dateTime = "now") {
-    $this->now = new DateTime($dateTime);
-    $this->nowOriginal = clone $this->now;
+  private function __construct($datetime) {
+    $this->initialize($datetime);
   }
 
   /**
    * Singleton function used to manage this object.
    *
-   * @return Object
+   * @param string $datetime A date/time string, suitable as first argument to php's DateTime().
+   *
+   * @return CRM_Casereminder_Util_Time
    */
-  public static function &singleton($timestamp = NULL) : CRM_Casereminder_Util_Time {
+  public static function &singleton($datetime = "now") : CRM_Casereminder_Util_Time {
     if (self::$_singleton === NULL) {
-      self::$_singleton = new CRM_Casereminder_Util_Time($timestamp);
+      self::$_singleton = new CRM_Casereminder_Util_Time($datetime);
     }
     return self::$_singleton;
+  }
+
+  /**
+   * Initialize this object with the given time.
+   *
+   * @param string $datetime A date/time string, suitable as first argument to php's DateTime().
+   *
+   * @return void
+   */
+  private function initialize($datetime = "now") : void {
+    $this->now = new DateTime($datetime);
+    $this->nowOriginal = clone $this->now;
   }
 
   public function getMysqlDatetime() : string {
@@ -69,7 +84,8 @@ class CRM_Casereminder_Util_Time {
   }
 
   /**
-   * Modify $now by some amount. Only if $this->isAlterAllowed().
+   * Modify $now by some amount. Only available if $this->isAlterAllowed().
+   * Modified instance may be reverted to its own original time with self::revert().
    *
    * @param String $modifier  A date/time string, in a format supported by DateTime::modify()
    *   Valid formats are explained in https://www.php.net/manual/en/datetime.formats.php
@@ -77,30 +93,45 @@ class CRM_Casereminder_Util_Time {
    * @return void
    */
   public function modify($modifier) : void {
-    if (!$this->isAlterAllowed()) {
-      $this->throwAlterNotAllowed(__METHOD__);
-    }
+    $this->errorIfAlterNotAllowed(__METHOD__);
     $this->now->modify($modifier);
   }
 
-  public function reset() {
-    if (!$this->isAlterAllowed()) {
-      $this->throwAlterNotAllowed(__METHOD__);
-    }
+  /**
+   * Completely re-initialize with given time. Only available if $this->isAlterAllowed().
+   * This is a complete re-initialization, so that hereafter, self::revert() will
+   * revert to the $datetime given here.
+   *
+   * @param string $datetime
+   */
+  public function reinitialize($datetime = "now") : void{
+    $this->errorIfAlterNotAllowed(__METHOD__);
+    $this->initialize($datetime);
+  }
+
+  /**
+   * Revert to original time. Only available if $this->isAlterAllowed().
+   * Original time is whatever was set at the most recent of:
+   *  a) singleton instantiation
+   *  b) most recent self::reinitialize() call.
+   */
+  public function revert() {
+    $this->errorIfAlterNotAllowed(__METHOD__);
     $this->now = clone($this->nowOriginal);
   }
 
   /**
-   * Are we allowed to modify $now? (Only when CIVICRM_UF=UnitTests).
-   *
-   * @return bool
+   * Is this object allowed to be altered? (Hint: Only if we're in a unit test.)
+   * @return boolean
    */
-  private function isAlterAllowed() {
+  public function isAlterAllowed() {
     return (getenv('CIVICRM_UF') == 'UnitTests');
   }
 
-  private function throwAlterNotAllowed($method) {
-    throw new Exception($method . ' is only available when CIVICRM_UF == "UnitTests".');
+  private function errorIfAlterNotAllowed($method) : void {
+    if (!$this->isAlterAllowed()) {
+      throw new Exception($method . ' is only available when CIVICRM_UF == "UnitTests".');
+    }
   }
 
 }

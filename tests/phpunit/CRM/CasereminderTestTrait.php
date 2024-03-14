@@ -27,6 +27,12 @@ trait CRM_CasereminderTestTrait {
   protected function setupCasereminderTests() {
     // Define 'now' as tomorrow, to ensure we're not testing for system "now".
     $this->now = CRM_Casereminder_Util_Time::singleton('+1 day');
+    // Some tests may have incremented $now. Reinitialize '+1 day' from real current time.
+    // We could also revert() to original initialized time, but reinitializing
+    // may help reduce the (vanishingly small) potential for problems as the
+    // real clock proceeds during tests, getting progressively further from the
+    // original value of $now.
+    $this->now->reinitialize('+1 day');
 
     // case is not enabled by default
     $enableResult = CRM_Core_BAO_ConfigSetting::enableComponent('CiviCase');

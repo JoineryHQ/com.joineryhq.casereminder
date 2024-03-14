@@ -131,17 +131,45 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
     $completed = CRM_Casereminder_Util_Casereminder::reminderTypeCompletedToday($this->reminderTypes['tomorrow']);
     $this->assertFalse($completed, 'After processall: RT"tomorrow" NOT completed today?');
 
+    // Test correct values for 'rt case sent (or not sent) today' for all RTs/Cases
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($this->reminderTypes['today1'], $this->cases[1]);
+    $this->assertTrue($sentToday, 'After processall: RT"today1", case 1, sent today?');
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($this->reminderTypes['today1'], $this->cases[2]);
+    $this->assertTrue($sentToday, 'After processall: RT"today1", case 2, sent today?');
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($this->reminderTypes['today2'], $this->cases[1]);
+    $this->assertTrue($sentToday, 'After processall: RT"today2", case 1, sent today?');
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($this->reminderTypes['today2'], $this->cases[2]);
+    $this->assertTrue($sentToday, 'After processall: RT"today2", case 2, sent today?');
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($this->reminderTypes['tomorrow'], $this->cases[1]);
+    $this->assertFalse($sentToday, 'After processall: RT"tomorrow", case 1, NOT sent today?');
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($this->reminderTypes['tomorrow'], $this->cases[2]);
+    $this->assertFalse($sentToday, 'After processall: RT"tomorrow", case 2, NOT sent today?');
+
     ////////////////////////////////////////////////////////////////////////////////
     // Increment $now by 1 day (i.e., test behavior on next calendar day).
     $this->now->modify('+1 day');
 
     // Test correct values for 'RT completed today' for all 3 RTs. These should all be 'no', because it's a new day now.
     $completed = CRM_Casereminder_Util_Casereminder::reminderTypeCompletedToday($this->reminderTypes['today1']);
-    $this->assertFalse($completed, 'After processall: RT"today1" completed today?');
+    $this->assertFalse($completed, 'On day 2:  RT"today1" completed today?');
     $completed = CRM_Casereminder_Util_Casereminder::reminderTypeCompletedToday($this->reminderTypes['today2']);
-    $this->assertFalse($completed, 'After processall: RT"today2" completed today?');
+    $this->assertFalse($completed, 'On day 2:  RT"today2" completed today?');
     $completed = CRM_Casereminder_Util_Casereminder::reminderTypeCompletedToday($this->reminderTypes['tomorrow']);
-    $this->assertFalse($completed, 'After processall: RT"tomorrow" NOT completed today?');
+    $this->assertFalse($completed, 'On day 2:  RT"tomorrow" NOT completed today?');
+
+    // Test correct values for 'rt case NOT sent today' for all RTs/Cases. These should all be 'no', because it's a new day now.
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($this->reminderTypes['today1'], $this->cases[1]);
+    $this->assertFalse($sentToday, 'On day 2:  RT"today1", case 1, NOT sent today?');
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($this->reminderTypes['today1'], $this->cases[2]);
+    $this->assertFalse($sentToday, 'On day 2:  RT"today1", case 2, NOT sent today?');
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($this->reminderTypes['today2'], $this->cases[1]);
+    $this->assertFalse($sentToday, 'On day 2:  RT"today2", case 1, NOT sent today?');
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($this->reminderTypes['today2'], $this->cases[2]);
+    $this->assertFalse($sentToday, 'On day 2:  RT"today2", case 2, NOT sent today?');
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($this->reminderTypes['tomorrow'], $this->cases[1]);
+    $this->assertFalse($sentToday, 'On day 2:  RT"tomorrow", case 1, NOT sent today?');
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($this->reminderTypes['tomorrow'], $this->cases[2]);
+    $this->assertFalse($sentToday, 'On day 2:  RT"tomorrow", case 2, NOT sent today?');
 
     // Since now->day-of-week is one day after original starting time, the "nowReminderTypes" should NOT include 'today1' and 'today2', but SHOULD include 'tomorrow'.
     $nowReminderTypes = CRM_Casereminder_Util_Casereminder::getNowReminderTypes();
@@ -153,16 +181,89 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
 
     ////////////////////////////////////////////////////////////////////////////////
     // Start the clock over and increment 7 days (i.e., one week in future from original starting time).
-    $this->now->reset();
+    $this->now->revert();
     $this->now->modify('+7 day');
 
     // Since now->day-of-week is same as original starting time, the "nowReminderTypes" should again include 'today1' and 'today2', but not 'tomorrow'.
     $nowReminderTypes = CRM_Casereminder_Util_Casereminder::getNowReminderTypes();
-    $this->assertEquals(2, count($nowReminderTypes), 'After setup(): Two nowReminderTypes found?');
+    $this->assertEquals(2, count($nowReminderTypes), 'On day 7: Two nowReminderTypes found?');
     $nowReminderTypeIds = array_keys($nowReminderTypes);
-    $this->assertContains($this->reminderTypes['today1']['id'], $nowReminderTypeIds, 'After setup(): RT1 is among nowReminderTypes?');
-    $this->assertContains($this->reminderTypes['today2']['id'], $nowReminderTypeIds, 'After setup(): RT2 is among nowReminderTypes?');
-    $this->assertNotContains($this->reminderTypes['tomorrow']['id'], $nowReminderTypeIds, 'After setup(): RT"tomorrow" is NOT among nowReminderTypes?');
+    $this->assertContains($this->reminderTypes['today1']['id'], $nowReminderTypeIds, 'On day 7: RT1 is among nowReminderTypes?');
+    $this->assertContains($this->reminderTypes['today2']['id'], $nowReminderTypeIds, 'On day 7: RT2 is among nowReminderTypes?');
+    $this->assertNotContains($this->reminderTypes['tomorrow']['id'], $nowReminderTypeIds, 'On day 7: RT"tomorrow" is NOT among nowReminderTypes?');
+  }
+
+  /**
+   *
+   */
+  public function testProcessAllHonorsMaxIterations() {
+    /* This test calls api casereminder.process all, which means that it
+     * relies on code in another extension (emailapi), which is known
+     * to produce testing errors unless patched. Therefore we'll skip it if
+     * the environment variable CASEREMINDER_TESTING_SKIP_EXTERNAL. For more
+     * information, see TESTING.md.
+     */
+    if (!getenv('CASEREMINDER_TESTING_COVER_EXTERNAL')) {
+      $this->addWarning("CASEREMINDER_TESTING_COVER_EXTERNAL is NOT set; this test has been skipped. See TESTING.md");
+      return;
+    }
+
+    // Create a reminderType with max_iterations=1. This should cause reminders
+    // to be sent for all cases (case1 and case2), but only the first time.
+    $reminderTypeMax1 = $this->createCaseReminderType([
+      'subject' => 'RT max_iterations 1',
+      'max_iterations' => 1,
+    ]);
+
+    // Call the processall api.
+    $apiResult = $this->callAPISuccess('Casereminder', 'processAll');
+
+    // Test correct values for 'rt case sent (or not sent) today' for Cases 1 and 2, with rt"max1"
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($reminderTypeMax1, $this->cases[1]);
+    $this->assertTrue($sentToday, 'After processall: RT"Max1", case 1, sent today?');
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($reminderTypeMax1, $this->cases[2]);
+    $this->assertTrue($sentToday, 'After processall: RT"Max1", case 2, sent today?');
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // Increment 7 days (i.e., one week in future from original starting time).
+    $this->now->modify('+7 day');
+
+    // Create another case (case3). This case should get a reminder today for RT"max1", because
+    // so far it has not received any reminders (it's a brand new case).
+    $case3 = $this->createCase($this->contactIds['creator'], $this->contactIds['client'], []);
+
+    // Call the processall api.
+    $apiResult = $this->callAPISuccess('Casereminder', 'processAll');
+
+    // Test correct values for 'rt case NOT sent today' for Cases 1 and 2, with rt"max1". These should have
+    // both reached max_iterations on Day 1, so now on Day 7 their reminders should not be sent.
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($reminderTypeMax1, $this->cases[1]);
+    $this->assertFalse($sentToday, 'After processall (day 7): RT"Max1", case 1, NOT sent today?');
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($reminderTypeMax1, $this->cases[2]);
+    $this->assertFalse($sentToday, 'After processall (day 7): RT"Max1", case 2, NOT sent today?');
+
+    // Test 'rt case sent today' for Case 3 with rt"max1". This should have a sent reminder,
+    // because it's a new case today, so it could not have reached max_iterations yet.
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($reminderTypeMax1, $case3);
+    $this->assertTrue($sentToday, 'After processall (day 7): RT"Max1", case 3, sent today?');
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // Start the clock over and increment 14 days (i.e., two weeks in future from original starting time).
+    $this->now->revert();
+    $this->now->modify('+14 day');
+
+    // Call the processall api.
+    $apiResult = $this->callAPISuccess('Casereminder', 'processAll');
+
+    // By Day 7, all cases (1, 2 and 3) should have reached max_iterations, so today (Day 14),
+    // none of them should have reminders sent.
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($reminderTypeMax1, $this->cases[1]);
+    $this->assertFalse($sentToday, 'After processall (day 14): RT"Max1", case 1, NOT sent today?');
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($reminderTypeMax1, $this->cases[2]);
+    $this->assertFalse($sentToday, 'After processall (day 14): RT"Max1", case 2, NOT sent today?');
+    $sentToday = CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($reminderTypeMax1, $case3);
+    $this->assertFalse($sentToday, 'After processall (day 14): RT"Max1", case 3, sent today?');
+
   }
 
   public function testProcessAllReturnValuesBrief() {
@@ -199,7 +300,7 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
     }
 
     $apiResult = $this->callAPISuccess('Casereminder', 'processAll', ['verbose' => TRUE]);
-    //  NOTE: $restult['values'] SHOULD look something like the following:
+    //  NOTE: $restult['values'] should look something like the following, though IDs will differ.
     //  $restult['values'] = [
     //    'reminderTypesProcessed' => [
     //      'count' => 2,
@@ -241,17 +342,23 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
       'totalCasesProcessed' => 4,
       'totalRemindersProcessed' => 4,
     ];
+    
     $this->assertEquals($expectedSummary, $values['summary'], 'API verbose "summary" results are correct?');
-    $this->assertEquals(2, $values['reminderTypesProcessed']['count'], '');
-    $this->assertEquals(2, count($values['reminderTypesProcessed']['ids']), '');
+    $this->assertEquals(2, $values['reminderTypesProcessed']['count'], 'API results correct for reminderTypesProcessed:count?');
+    $this->assertContains($this->reminderTypes['today1']['id'], $values['reminderTypesProcessed']['ids'], 'API results contain RT"today1" in reminderTypesProcessed:ids?');
+    $this->assertContains($this->reminderTypes['today2']['id'], $values['reminderTypesProcessed']['ids'], 'API results contain RT"today2" in reminderTypesProcessed:ids?');
 
-    $this->assertEquals(2, count($values['casesPerReminderType']), '');
-    $i = 0;
-    foreach ($values['casesPerReminderType'] as $reminderTypeCases) {
-      $this->assertEquals(2, count($reminderTypeCases['caseIds']), "casesPerReminderType[{$i}th element]: count of caseIds is correct?");
-      $this->assertEquals(2, $reminderTypeCases['count'], "casesPerReminderType[{$i}th element]: 'count' value is correct?");
-      $i++;
-    }
+    $this->assertEquals(2, count($values['casesPerReminderType']), 'API results show 2 RTs in casesPerReminderType?');
+    
+    $this->assertEquals(2, $values['casesPerReminderType'][$this->reminderTypes['today1']['id']]['count'], 'casesPerReminderType[RT"today1"][count] is 2?');
+    $this->assertEquals(2, count($values['casesPerReminderType'][$this->reminderTypes['today1']['id']]), 'casesPerReminderType shows 2 cases for RT"today1"?');
+    $this->assertContains($this->cases[1]['id'], $values['casesPerReminderType'][$this->reminderTypes['today1']['id']]['caseIds'], 'casesPerReminderType for RT"today1" contains case1?');
+    $this->assertContains($this->cases[2]['id'], $values['casesPerReminderType'][$this->reminderTypes['today1']['id']]['caseIds'], 'casesPerReminderType for RT"today1" contains case2?');
+
+    $this->assertEquals(2, $values['casesPerReminderType'][$this->reminderTypes['today2']['id']]['count'], 'casesPerReminderType[RT"today2"][count] is 2?');
+    $this->assertEquals(2, count($values['casesPerReminderType'][$this->reminderTypes['today2']['id']]), 'casesPerReminderType shows 2 cases for RT"today2"?');
+    $this->assertContains($this->cases[1]['id'], $values['casesPerReminderType'][$this->reminderTypes['today2']['id']]['caseIds'], 'casesPerReminderType for RT"today2" contains case1?');
+    $this->assertContains($this->cases[2]['id'], $values['casesPerReminderType'][$this->reminderTypes['today2']['id']]['caseIds'], 'casesPerReminderType for RT"today2" contains case2?');
 
   }
 
