@@ -74,16 +74,21 @@ class CRM_Casereminder_Util_Casereminder {
    * @param array $recipientCids List of contactIds for recipients.
    * @param array $sendingParams As returned by e.g. self::prepCaseReminderSendingParams().
    *
-   * @return void
+   * @return int Total number of successful email.api calls (should be equal to count($recipientCids).
    */
   public static function sendCaseReminder($caseId, $reminderTypeId, $recipientCids, $sendingParams) {
+    $ret = 0;
     foreach ($recipientCids as $recipientCid) {
       $sendingParams['contact_id'] = $recipientCid;
       CRM_Casereminder_Util_Token::setTokenEnvCaseId($caseId);
       $emailSend = _casereminder_civicrmapi('Email', 'send', $sendingParams);
+      if (!($emailSend['is_error'] ?? NULL)) {
+        $ret++;
+      }
       CRM_Casereminder_Util_Token::setTokenEnvCaseId(NULL);
     }
     CRM_Casereminder_Util_Log::logReminderCase($reminderTypeId, CRM_Casereminder_Util_Log::ACTION_CASE_SEND, $caseId);
+    return $ret;
   }
 
   public static function buildRecipientList($case, $reminderType) {
@@ -187,7 +192,7 @@ class CRM_Casereminder_Util_Casereminder {
   }
 
   public static function reminderTypeCaseReachedMaxIterations($reminderType, $case) {
-    $maxIterations = $reminderType['max_iterations'];
+    $maxIterations = ($reminderType['max_iterations'] ?? '');
 
     // If maxiterations is empty or 0, we'll never reach it, so return false.
     if (empty($maxIterations)) {

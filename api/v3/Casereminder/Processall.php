@@ -10,11 +10,11 @@ use CRM_Casereminder_ExtensionUtil as E;
  * @see https://docs.civicrm.org/dev/en/latest/framework/api-architecture/
  */
 function _civicrm_api3_casereminder_Processall_spec(&$spec) {
-  $spec['timestamp'] = [
-    'title' => 'Testing timestamp',
-    'description' => 'Unix timestamp as an ad-hoc value for now(), used in testing',
+  $spec['verbose'] = [
+    'title' => 'Verbose',
+    'description' => 'Provide verbose output',
     'api.required' => 0,
-    'type' => CRM_Utils_Type::T_INT,
+    'type' => CRM_Utils_Type::T_BOOLEAN,
   ];
 }
 
@@ -31,29 +31,63 @@ function _civicrm_api3_casereminder_Processall_spec(&$spec) {
  * @throws API_Exception
  */
 function civicrm_api3_casereminder_Processall($params) {
-  // Set "now" timestamp if provided.
-  CRM_Casereminder_Util_Time::singleton($params['timestamp'] ?? NULL);
-
+  $verboseReturnValues = [
+    'reminderTypesProcessed' => [
+      'count' => 0,
+      'ids' => [],
+    ],
+    'casesPerReminderType' => [
+      /*
+       * [reminderTypeId] => [
+       *   'count' => [],
+       *   'caseIds' => [],
+       * ]
+       */
+    ],
+  ];
+  $briefReturnValues = [
+    'reminderTypesProcessed' => 0,
+    'totalCasesProcessed' => 0,
+    'totalRemindersProcessed' => 0,
+  ];
   $nowReminderTypes = CRM_Casereminder_Util_Casereminder::getNowReminderTypes();
   foreach ($nowReminderTypes as $nowReminderType) {
     if (!CRM_Casereminder_Util_Casereminder::reminderTypeCompletedToday($nowReminderType)) {
-      CRM_Casereminder_Util_Log::logReminderType($nowReminderType['id'], CRM_Casereminder_Util_Log::ACTION_REMINDER_TYPE_BEGIN);
+      $nowReminderTypeId = $nowReminderType['id'];
+      $verboseReturnValues['casesPerReminderType'][$nowReminderTypeId]['caseIds'] = [];
+      CRM_Casereminder_Util_Log::logReminderType($nowReminderTypeId, CRM_Casereminder_Util_Log::ACTION_REMINDER_TYPE_BEGIN);
       // Get cases matching this reminder type.
       $reminderTypeCases = CRM_Casereminder_Util_Casereminder::getReminderTypeCases($nowReminderType);
       foreach ($reminderTypeCases as $reminderTypeCase) {
         if (
           !CRM_Casereminder_Util_Casereminder::reminderTypeCaseSentToday($nowReminderType, $reminderTypeCase)
           && !CRM_Casereminder_Util_Casereminder::reminderTypeCaseReachedMaxIterations($nowReminderType, $reminderTypeCase)
-        ) {
-          $recipientCids = CRM_Casereminder_Util_Casereminder::buildRecipientList($case, $reminderType);
+          ) {
+          $recipientCids = CRM_Casereminder_Util_Casereminder::buildRecipientList($reminderTypeCase, $nowReminderType);
           $sendingParams = CRM_Casereminder_Util_Casereminder::prepCaseReminderSendingParams($reminderTypeCase, $nowReminderType);
-          CRM_Casereminder_Util_Casereminder::sendCaseReminder($case['id'], $recipientCids, $sendingParams);
+          $sentCount = CRM_Casereminder_Util_Casereminder::sendCaseReminder($reminderTypeCase['id'], $nowReminderTypeId, $recipientCids, $sendingParams);
+          $briefReturnValues['totalRemindersProcessed'] += $sentCount;
+          $briefReturnValues['totalCasesProcessed']++;
+          $verboseReturnValues['casesPerReminderType'][$nowReminderTypeId]['caseIds'][] = $reminderTypeCase['id'];
         }
       }
-      CRM_Casereminder_Util_Log::logReminderType($nowReminderType['id'], CRM_Casereminder_Util_Log::ACTION_REMINDER_TYPE_COMPLETE);
+      CRM_Casereminder_Util_Log::logReminderType($nowReminderTypeId, CRM_Casereminder_Util_Log::ACTION_REMINDER_TYPE_COMPLETE);
+      $briefReturnValues['reminderTypesProcessed']++;
+      $verboseReturnValues['reminderTypesProcessed']['ids'][] = $nowReminderTypeId;
     }
   }
 
+  if ($params['verbose'] ?? NULL) {
+    $verboseReturnValues['reminderTypesProcessed']['count'] = count($verboseReturnValues['reminderTypesProcessed']['ids']);
+    foreach ($verboseReturnValues['casesPerReminderType'] as &$reminderTypeDetails) {
+      $reminderTypeDetails['count'] = count($reminderTypeDetails['caseIds']);
+    }
+    $verboseReturnValues['summary'] = $briefReturnValues;
+    $returnValues = $verboseReturnValues;
+  }
+  else {
+    $returnValues = $briefReturnValues;
+  }
   return civicrm_api3_create_success($returnValues, $params, 'Casereminder', 'Processall');
 
 }
