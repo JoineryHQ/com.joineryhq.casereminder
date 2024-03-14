@@ -120,17 +120,18 @@ class CRM_Casereminder_Util_Token {
   private static function getCaseTokenValue($case, $tokenName) {
     $tokenValue = '';
     $caseFields = self::getCaseFieldsForTokens();
-    $tokenValue = $case[$tokenName];
-    $caseField = $caseFields[$tokenName];
-    if ($caseField['pseudoconstant'] ?? '') {
-      $pseudoConstantOptions = CRM_Case_BAO_Case::buildOptions($tokenName);
-      $tokenValue = $pseudoConstantOptions[$tokenValue];
-    }
-    elseif ($caseField['type'] == CRM_Utils_Type::T_BOOLEAN) {
-      $tokenValue = ($tokenValue ? E::ts('Yes') : E::ts('No'));
-    }
-    elseif ($caseField['type'] == CRM_Utils_Type::T_TIMESTAMP) {
-      $tokenValue = CRM_Utils_Date::customFormat($tokenValue);
+    $tokenValue = ($case[$tokenName] ?? '');
+    if ($caseField = ($caseFields[$tokenName] ?? '')) {
+      if ($caseField['pseudoconstant'] ?? '') {
+        $pseudoConstantOptions = CRM_Case_BAO_Case::buildOptions($tokenName);
+        $tokenValue = $pseudoConstantOptions[$tokenValue];
+      }
+      elseif ($caseField['type'] == CRM_Utils_Type::T_BOOLEAN) {
+        $tokenValue = ($tokenValue ? E::ts('Yes') : E::ts('No'));
+      }
+      elseif ($caseField['type'] == CRM_Utils_Type::T_TIMESTAMP) {
+        $tokenValue = CRM_Utils_Date::customFormat($tokenValue);
+      }
     }
     return $tokenValue;
   }
