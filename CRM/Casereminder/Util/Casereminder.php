@@ -16,6 +16,7 @@ class CRM_Casereminder_Util_Casereminder {
     $caseReminderTypeGet = _casereminder_civicrmapi('caseReminderType', 'get', [
       'dow' => CRM_Casereminder_Util_Time::singleton()->getDayOfWeek(),
       'is_active' => 1,
+      'options' => ['limit' => 0],
     ]);
     return $caseReminderTypeGet['values'];
   }
@@ -29,6 +30,7 @@ class CRM_Casereminder_Util_Casereminder {
     $apiParams = [
       'case_type_id' => $reminderType['case_type_id'],
       'is_deleted' => FALSE,
+      'options' => ['limit' => 0],
     ];
     if ($reminderType['case_status_id']) {
       $apiParams['status_id'] = ['IN' => $reminderType['case_status_id']];
@@ -141,7 +143,6 @@ class CRM_Casereminder_Util_Casereminder {
       'case_reminder_type_id' => $reminderType['id'],
       'action' => CRM_Casereminder_Util_Log::ACTION_REMINDER_TYPE_COMPLETE,
     ];
-    $caseReminderLogTypeGet = _casereminder_civicrmapi('CaseReminderLogType', 'get', $apiParams);
     $caseReminderLogTypeCount = _casereminder_civicrmapi('CaseReminderLogType', 'getcount', $apiParams);
     if ($caseReminderLogTypeCount) {
       // "Completed" log entry found today; reminderType is not needed now.
