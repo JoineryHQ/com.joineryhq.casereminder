@@ -71,6 +71,7 @@ class CRM_Casereminder_Util_Casereminder {
 
   /**
    * Send a reminder of a given type for a given case.
+   * @param array $taskContext queue task context
    * @param int $caseId ID of the case.
    * @param int $reminderTypeId ID of the reminderType.
    * @param array $recipientCids List of contactIds for recipients.
@@ -78,16 +79,35 @@ class CRM_Casereminder_Util_Casereminder {
    *
    * @return int Total number of successful email.api calls (should be equal to count($recipientCids).
    */
-  public static function sendCaseReminder($caseId, $reminderTypeId, $recipientCids, $sendingParams) {
+  public static function sendQueuedCaseReminder($taskContext, $caseId, $reminderTypeId, $recipientCids, $sendingParams) {
+
+    //    TODO:
+    //      - this method should be changed to: sendQueuedCaseReminderEmail($taskContext, $caseId, $reminderTypeId, $recipientCid, $sendingParams).
+    //        Note singular "$recipientCid". This method should only send a single email.
+    //      - That means refactoring the processall api to enqueue individual emails instead of casereminders.
+    //      - if there's an error in sending (e.g. bad smtp parameters), an exception will be thrown somewhere downstream,
+    //        and that will stop the queue runner (and also mark this queue task as failed, to be retried later)
+    //      - If there's no error in sending, task runner will have to count this as one email sent (against max of 'mailerBatchLimit'),
+    //        even though emailapi may not send a mail (e.g. if recipient has no email address or address is marked on_hold).
+
+    return FALSE;
+    throw new CRM_Extension_Exception('foobar');
+    $mailerSettings = CRM_Casereminder_Util_MailerSettings::singleton();
+
     $ret = 0;
     foreach ($recipientCids as $recipientCid) {
       $sendingParams['contact_id'] = $recipientCid;
       CRM_Casereminder_Util_Token::setTokenEnvCaseId($caseId);
       $emailSend = _casereminder_civicrmapi('Email', 'send', $sendingParams);
-      if (!($emailSend['is_error'] ?? NULL)) {
+      if (($emailSend['is_error'] ?? NULL)) {
+        var_dump($emailSend);
+        return FALSE;
+      }
+      else {
         $ret++;
       }
       CRM_Casereminder_Util_Token::setTokenEnvCaseId(NULL);
+      usleep($mailerSettings->get('mailThrottleTime'));
     }
     CRM_Casereminder_Util_Log::logReminderCase($reminderTypeId, CRM_Casereminder_Util_Log::ACTION_CASE_SEND, $caseId);
     return $ret;
@@ -209,6 +229,81 @@ class CRM_Casereminder_Util_Casereminder {
     $caseReminderLogCaseCount = _casereminder_civicrmapi('CaseReminderLogCase', 'getcount', $apiParams);
     return ($caseReminderLogCaseCount >= $maxIterations);
 
+  }
+
+  public static function enqueueCaseReminder($caseId, $reminderTypeId, $recipientCids, $sendingParams) {
+
+    //    TODO:
+    //      - This method should be renamed to: enqueueCaseReminderEmails($caseId, $reminderTypeId, $recipientCids, $sendingParams),
+    //        to enqueue one task per casereminder recipientCid (tasks to be run by self::sendQueuedCaseReminderEmail())
+
+    // FIXME: refactor to new Queue class.
+    $queueName = 'Casereminder_reminders';
+    $queue = Civi::queue($queueName, [
+      'type' => 'CasereminderSql',
+      'runner' => 'task',
+      'error' => 'abort',
+      'status' => 'active',
+      'retry_interval' => '10',
+    ]);
+    $queue->createItem(new CRM_Queue_Task(
+      // callback:
+      ['CRM_Casereminder_Util_Casereminder', 'sendQueuedCaseReminder'],
+      // arguments:
+      func_get_args(),
+    ));
+  }
+
+  public static function processQueue() {
+    // FIXME: refactor to new Queue class.
+
+    // Acquire lock or return special "cannot get lock" value of -1.
+    $casereminderLock = Civi::lockManager()->acquire('worker.casereminder.processqueue');
+    if (!$casereminderLock->isAcquired()) {
+      //      TODO:
+      //        - instead of returning a magic value, throw a custom exception with recognizable code,
+      //          and catch that exception in processall api.
+      return -1;
+    }
+
+    $queueName = 'Casereminder_reminders';
+    $queue = Civi::queue($queueName, [
+      'type' => 'CasereminderSql',
+      'runner' => 'task',
+      'error' => 'abort',
+      'status' => 'active',
+      'retry_interval' => '10',
+    ]);
+
+    $runner = new CRM_Queue_Runner([
+      'queue' => $queue,
+    ]);
+
+    $taskResult = $runner->formatTaskResult(TRUE);
+    $itemSuccessCount = 0;
+
+    $mailerSettings = CRM_Casereminder_Util_MailerSettings::singleton();
+    $emailSendCount = 0;
+
+    while ($taskResult['is_continue']) {
+      $taskResult = $runner->runNext();
+      if (!($taskResult['is_error'] ?? '')) {
+        $itemSuccessCount++;
+      }
+
+      //      TODO:
+      //        - Each item is a single email to a single recipient (though we cannot know)
+      //          whether emailapi actually sent an email (e.g. if recipient has no email
+      //          address or the mail address is on_hold). So our count may be off by
+      //          some small amount.
+      //        - If our count exceeds 'mailerBatchLimit', we should stop processing here.
+
+      if ($itemSuccessCount >= $mailerSettings->get('mailerBatchLimit')) {
+        break;
+      }
+    }
+
+    return $itemSuccessCount;
   }
 
 }

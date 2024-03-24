@@ -46,9 +46,11 @@ function civicrm_api3_casereminder_Processall($params) {
     ],
   ];
   $briefReturnValues = [
-    'reminderTypesProcessed' => 0,
+    'totalReminderTypesProcessed' => 0,
     'totalCasesProcessed' => 0,
-    'totalRemindersProcessed' => 0,
+    'totalRemindersEnqueued' => 0,
+    'totalRemindersSent' => 0,
+    'totalRemindersSent-info' => NULL,
   ];
   $nowReminderTypes = CRM_Casereminder_Util_Casereminder::getNowReminderTypes();
   foreach ($nowReminderTypes as $nowReminderType) {
@@ -65,16 +67,26 @@ function civicrm_api3_casereminder_Processall($params) {
           ) {
           $recipientCids = CRM_Casereminder_Util_Casereminder::buildRecipientList($reminderTypeCase, $nowReminderType);
           $sendingParams = CRM_Casereminder_Util_Casereminder::prepCaseReminderSendingParams($reminderTypeCase, $nowReminderType);
-          $sentCount = CRM_Casereminder_Util_Casereminder::sendCaseReminder($reminderTypeCase['id'], $nowReminderTypeId, $recipientCids, $sendingParams);
-          $briefReturnValues['totalRemindersProcessed'] += $sentCount;
+          $sentCount = CRM_Casereminder_Util_Casereminder::enqueueCaseReminder($reminderTypeCase['id'], $nowReminderTypeId, $recipientCids, $sendingParams);
+          $briefReturnValues['totalRemindersEnqueued'] += $sentCount;
           $briefReturnValues['totalCasesProcessed']++;
           $verboseReturnValues['casesPerReminderType'][$nowReminderTypeId]['caseIds'][] = $reminderTypeCase['id'];
         }
       }
       CRM_Casereminder_Util_Log::logReminderType($nowReminderTypeId, CRM_Casereminder_Util_Log::ACTION_REMINDER_TYPE_COMPLETE);
-      $briefReturnValues['reminderTypesProcessed']++;
+      $briefReturnValues['totalReminderTypesProcessed']++;
       $verboseReturnValues['reminderTypesProcessed']['ids'][] = $nowReminderTypeId;
     }
+  }
+
+  // Now we've enqueued all appropriate items at the present moment; next, process the queue.
+  $processQueueRet = CRM_Casereminder_Util_Casereminder::processQueue();
+  if ($processQueueRet == -1) {
+    $briefReturnValues['totalRemindersSent'] = 0;
+    $briefReturnValues['totalRemindersSent-info'] = E::ts('Could not acquire lock. Is another job processing the queue?');
+  }
+  else {
+    $briefReturnValues['totalRemindersSent'] = $processQueueRet;
   }
 
   if ($params['verbose'] ?? NULL) {
