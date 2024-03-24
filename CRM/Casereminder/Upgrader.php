@@ -66,7 +66,7 @@ class CRM_Casereminder_Upgrader extends CRM_Extension_Upgrader_Base {
    * @return TRUE on success
    * @throws CRM_Core_Exception
    */
-   public function upgrade_4200(): bool {
+  public function upgrade_4200(): bool {
     $this->ctx->log->info('Applying update 4200: Add log tables');
     CRM_Core_DAO::executeQuery('DROP TABLE IF EXISTS `civicrm_case_reminder_log_case`');
     CRM_Core_DAO::executeQuery("
@@ -83,7 +83,7 @@ class CRM_Casereminder_Upgrader extends CRM_Extension_Upgrader_Base {
       )
       ENGINE=InnoDB;
     ");
-       
+
     CRM_Core_DAO::executeQuery('DROP TABLE IF EXISTS `civicrm_case_reminder_log_type`');
     CRM_Core_DAO::executeQuery("
       CREATE TABLE `civicrm_case_reminder_log_type` (
@@ -98,7 +98,66 @@ class CRM_Casereminder_Upgrader extends CRM_Extension_Upgrader_Base {
       ENGINE=InnoDB;
     ");
     return TRUE;
-   }
+  }
+
+  /**
+   * Add queue tables
+   *
+   * @return TRUE on success
+   * @throws CRM_Core_Exception
+   */
+  public function upgrade_4203(): bool {
+    $this->ctx->log->info('Applying update 4202: Add queue tables');
+    CRM_Core_DAO::executeQuery('DROP TABLE IF EXISTS `civicrm_case_reminder_job_recipient_error`');
+    CRM_Core_DAO::executeQuery('DROP TABLE IF EXISTS `civicrm_case_reminder_job_recipient`');
+    CRM_Core_DAO::executeQuery('DROP TABLE IF EXISTS `civicrm_case_reminder_job`');
+
+    CRM_Core_DAO::executeQuery("
+      CREATE TABLE `civicrm_case_reminder_job` (
+        `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique CaseReminderLogJob ID',
+        `reminder_type_id` int unsigned COMMENT 'FK to reminderType',
+        `start` datetime NULL COMMENT 'When queue processing began for this job.',
+        `end` datetime NULL COMMENT 'When queue processing was completed for this job.',
+        `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When log entry created.',
+        PRIMARY KEY (`id`),
+        CONSTRAINT FK_civicrm_case_reminder_job_reminder_type_id FOREIGN KEY (`reminder_type_id`) REFERENCES `civicrm_case_reminder_type`(`id`) ON DELETE CASCADE
+      )
+      ENGINE=InnoDB;
+    ");
+
+    CRM_Core_DAO::executeQuery("
+      CREATE TABLE `civicrm_case_reminder_job_recipient` (
+        `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique CaseReminderLogRecipient ID',
+        `job_id` int unsigned NOT NULL COMMENT 'FK to casereminder job',
+        `case_id` int unsigned NOT NULL COMMENT 'FK to Case',
+        `contact_id` int unsigned NOT NULL COMMENT 'FK to Contact',
+        `relationship_type_id` int unsigned COMMENT 'Case Role relationship type',
+        `sent_to` varchar(254) NULL COMMENT 'Email address to which reminder was sent (if any)',
+        `status` varchar(255) COMMENT 'Standardized description of recipient status',
+        `status_time` datetime NULL COMMENT 'When was status updated?',
+        PRIMARY KEY (`id`),
+        CONSTRAINT FK_civicrm_case_reminder_job_recipient_job_id FOREIGN KEY (`job_id`) REFERENCES `civicrm_case_reminder_job`(`id`) ON DELETE CASCADE,
+        CONSTRAINT FK_civicrm_case_reminder_job_recipient_case_id FOREIGN KEY (`case_id`) REFERENCES `civicrm_case`(`id`) ON DELETE CASCADE,
+        CONSTRAINT FK_civicrm_case_reminder_job_recipient_contact_id FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact`(`id`) ON DELETE CASCADE,
+        CONSTRAINT FK_civicrm_case_reminder_job_recipient_relationship_type_id FOREIGN KEY (`relationship_type_id`) REFERENCES `civicrm_relationship_type`(`id`) ON DELETE SET NULL
+      )
+      ENGINE=InnoDB;
+    ");
+
+    CRM_Core_DAO::executeQuery("
+      CREATE TABLE `civicrm_case_reminder_job_recipient_error` (
+        `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique CaseReminderJobRecipientError ID',
+        `job_recipient_id` int unsigned NOT NULL COMMENT 'FK to casereminder job recipient',
+        `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When log entry created.',
+        `error_message` varchar(255) NOT NULL COMMENT 'Error message',
+        PRIMARY KEY (`id`),
+        CONSTRAINT FK_civicrm_case_reminder_job_recipient_error_job_recipient_id FOREIGN KEY (`job_recipient_id`) REFERENCES `civicrm_case_reminder_job_recipient`(`id`) ON DELETE CASCADE
+      )
+      ENGINE=InnoDB;
+    ");
+
+    return TRUE;
+  }
 
   /**
    * Example: Run an external SQL script.

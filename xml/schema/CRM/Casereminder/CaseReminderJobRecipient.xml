@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Casereminder</base>
+  <class>CaseReminderJobRecipient</class>
+  <name>civicrm_case_reminder_job_recipient</name>
+  <comment>FIXME</comment>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique CaseReminderLogRecipient ID</comment>
+    <html>
+      <type>Number</type>
+    </html>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>job_id</name>
+    <type>int unsigned</type>
+    <comment>FK to casereminder job</comment>
+    <required>true</required>
+    <export>true</export>
+  </field>
+  <foreignKey>
+    <name>job_id</name>
+    <table>civicrm_case_reminder_job</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>case_id</name>
+    <type>int unsigned</type>
+    <comment>FK to Case</comment>
+    <required>true</required>
+    <export>true</export>
+  </field>
+  <foreignKey>
+    <name>case_id</name>
+    <table>civicrm_case</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>contact_id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>FK to Contact</comment>
+  </field>
+  <foreignKey>
+    <name>contact_id</name>
+    <table>civicrm_contact</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>relationship_type_id</name>
+    <type>int unsigned</type>
+    <title>Case Role Relationship Type ID</title>
+    <comment>Case Role relationship type</comment>
+    <add>1.1</add>
+    <html>
+      <type>Select</type>
+      <label>Relationship Type</label>
+    </html>
+    <pseudoconstant>
+      <table>civicrm_relationship_type</table>
+      <keyColumn>id</keyColumn>
+      <nameColumn>name_a_b</nameColumn>
+      <labelColumn>label_a_b</labelColumn>
+    </pseudoconstant>
+  </field>
+  <foreignKey>
+    <name>relationship_type_id</name>
+    <table>civicrm_relationship_type</table>
+    <key>id</key>
+    <add>1.1</add>
+    <onDelete>SET NULL</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>sent_to</name>
+    <type>varchar</type>
+    <length>254</length>
+    <required>false</required>
+    <comment>Email address to which reminder was sent (if any)</comment>
+  </field>
+
+  <field>
+    <name>status</name>
+    <type>varchar</type>
+    <length>255</length>
+    <comment>Standardized description of recipient status</comment>
+    <export>true</export>
+  </field>
+  
+  <field>
+    <name>status_time</name>
+    <type>datetime</type>
+    <comment>When was status updated?</comment>
+    <required>false</required>
+    <export>true</export>
+    <readonly>true</readonly>    
+  </field>
+
+</table>

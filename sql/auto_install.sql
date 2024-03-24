@@ -19,6 +19,9 @@ SET FOREIGN_KEY_CHECKS=0;
 
 DROP TABLE IF EXISTS `civicrm_case_reminder_log_type`;
 DROP TABLE IF EXISTS `civicrm_case_reminder_log_case`;
+DROP TABLE IF EXISTS `civicrm_case_reminder_job_recipient_error`;
+DROP TABLE IF EXISTS `civicrm_case_reminder_job_recipient`;
+DROP TABLE IF EXISTS `civicrm_case_reminder_job`;
 DROP TABLE IF EXISTS `civicrm_case_reminder_type`;
 
 SET FOREIGN_KEY_CHECKS=1;
@@ -49,6 +52,65 @@ CREATE TABLE `civicrm_case_reminder_type` (
   PRIMARY KEY (`id`),
   CONSTRAINT FK_civicrm_case_reminder_type_case_type_id FOREIGN KEY (`case_type_id`) REFERENCES `civicrm_case_type`(`id`) ON DELETE CASCADE,
   CONSTRAINT FK_civicrm_case_reminder_type_msg_template_id FOREIGN KEY (`msg_template_id`) REFERENCES `civicrm_msg_template`(`id`) ON DELETE SET NULL
+)
+ENGINE=InnoDB;
+
+-- /*******************************************************
+-- *
+-- * civicrm_case_reminder_job
+-- *
+-- * FIXME
+-- *
+-- *******************************************************/
+CREATE TABLE `civicrm_case_reminder_job` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique CaseReminderLogJob ID',
+  `reminder_type_id` int unsigned COMMENT 'FK to reminderType',
+  `start` datetime NULL COMMENT 'When queue processing began for this job.',
+  `end` datetime NULL COMMENT 'When queue processing was completed for this job.',
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When log entry created.',
+  PRIMARY KEY (`id`),
+  CONSTRAINT FK_civicrm_case_reminder_job_reminder_type_id FOREIGN KEY (`reminder_type_id`) REFERENCES `civicrm_case_reminder_type`(`id`) ON DELETE CASCADE
+)
+ENGINE=InnoDB;
+
+-- /*******************************************************
+-- *
+-- * civicrm_case_reminder_job_recipient
+-- *
+-- * FIXME
+-- *
+-- *******************************************************/
+CREATE TABLE `civicrm_case_reminder_job_recipient` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique CaseReminderLogRecipient ID',
+  `job_id` int unsigned NOT NULL COMMENT 'FK to casereminder job',
+  `case_id` int unsigned NOT NULL COMMENT 'FK to Case',
+  `contact_id` int unsigned NOT NULL COMMENT 'FK to Contact',
+  `relationship_type_id` int unsigned COMMENT 'Case Role relationship type',
+  `sent_to` varchar(254) NULL COMMENT 'Email address to which reminder was sent (if any)',
+  `status` varchar(255) COMMENT 'Standardized description of recipient status',
+  `status_time` datetime NULL COMMENT 'When was status updated?',
+  PRIMARY KEY (`id`),
+  CONSTRAINT FK_civicrm_case_reminder_job_recipient_job_id FOREIGN KEY (`job_id`) REFERENCES `civicrm_case_reminder_job`(`id`) ON DELETE CASCADE,
+  CONSTRAINT FK_civicrm_case_reminder_job_recipient_case_id FOREIGN KEY (`case_id`) REFERENCES `civicrm_case`(`id`) ON DELETE CASCADE,
+  CONSTRAINT FK_civicrm_case_reminder_job_recipient_contact_id FOREIGN KEY (`contact_id`) REFERENCES `civicrm_contact`(`id`) ON DELETE CASCADE,
+  CONSTRAINT FK_civicrm_case_reminder_job_recipient_relationship_type_id FOREIGN KEY (`relationship_type_id`) REFERENCES `civicrm_relationship_type`(`id`) ON DELETE SET NULL
+)
+ENGINE=InnoDB;
+
+-- /*******************************************************
+-- *
+-- * civicrm_case_reminder_job_recipient_error
+-- *
+-- * Errors in queue processing for job recipients
+-- *
+-- *******************************************************/
+CREATE TABLE `civicrm_case_reminder_job_recipient_error` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique CaseReminderJobRecipientError ID',
+  `job_recipient_id` int unsigned NOT NULL COMMENT 'FK to casereminder job recipient',
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When log entry created.',
+  `error_message` varchar(255) NOT NULL COMMENT 'Error message',
+  PRIMARY KEY (`id`),
+  CONSTRAINT FK_civicrm_case_reminder_job_recipient_error_job_recipient_id FOREIGN KEY (`job_recipient_id`) REFERENCES `civicrm_case_reminder_job_recipient`(`id`) ON DELETE CASCADE
 )
 ENGINE=InnoDB;
 

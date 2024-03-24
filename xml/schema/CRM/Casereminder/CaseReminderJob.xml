@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Casereminder</base>
+  <class>CaseReminderJob</class>
+  <name>civicrm_case_reminder_job</name>
+  <comment>FIXME</comment>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique CaseReminderLogJob ID</comment>
+    <html>
+      <type>Number</type>
+    </html>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>reminder_type_id</name>
+    <type>int unsigned</type>
+    <comment>FK to reminderType</comment>
+  </field>
+  <foreignKey>
+    <name>reminder_type_id</name>
+    <table>civicrm_case_reminder_type</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>start</name>
+    <type>datetime</type>
+    <comment>When queue processing began for this job.</comment>
+    <required>false</required>
+    <export>true</export>
+    <readonly>true</readonly>    
+  </field>
+
+  <field>
+    <name>end</name>
+    <type>datetime</type>
+    <comment>When queue processing was completed for this job.</comment>
+    <required>false</required>
+    <export>true</export>
+    <readonly>true</readonly>    
+  </field>
+
+  <field>
+    <name>created</name>
+    <type>timestamp</type>
+    <comment>When log entry created.</comment>
+    <required>true</required>
+    <export>true</export>
+    <default>CURRENT_TIMESTAMP</default>
+    <readonly>true</readonly>    
+  </field>
+
+</table>

@@ -191,7 +191,7 @@ class CRM_Casereminder_Util_Casereminder_HeadlessTest extends \PHPUnit\Framework
     $role14ContactId = $this->individualCreate();
     $role12ContactId = $this->individualCreate();
 
-    // Ensure there's a logged-in user.
+    // Ensure there's a logged-in user -- required for addCaseRoleContact().
     $this->createLoggedInUser();
 
     // Add contacts in case roles.

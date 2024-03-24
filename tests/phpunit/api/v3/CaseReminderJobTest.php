@@ -6,10 +6,10 @@ use Civi\Test\HookInterface;
 use Civi\Test\TransactionalInterface;
 
 /**
- * CaseReminderType API Test Case
+ * CaseReminderJob API Test Case
  * @group headless
  */
-class api_v3_CaseReminderTypeTest extends \PHPUnit\Framework\TestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
+class api_v3_CaseReminderJobTest extends \PHPUnit\Framework\TestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
   use \Civi\Test\Api3TestTrait;
   use CRM_CasereminderTestTrait;
 
@@ -30,8 +30,8 @@ class api_v3_CaseReminderTypeTest extends \PHPUnit\Framework\TestCase implements
    * The setup() method is executed before the test is executed (optional).
    */
   public function setUp(): void {
-    $table = CRM_Core_DAO_AllCoreTables::getTableForEntityName('CaseReminderType');
-    $this->assertTrue($table && CRM_Core_DAO::checkTableExists($table), 'There was a problem with extension installation. Table for ' . 'CaseReminderType' . ' not found.');
+    $table = CRM_Core_DAO_AllCoreTables::getTableForEntityName('CaseReminderJob');
+    $this->assertTrue($table && CRM_Core_DAO::checkTableExists($table), 'There was a problem with extension installation. Table for ' . 'CaseReminderJob' . ' not found.');
 
     $this->setupCasereminderTests();
 
@@ -52,6 +52,7 @@ class api_v3_CaseReminderTypeTest extends \PHPUnit\Framework\TestCase implements
    * Note how the function name begins with the word "test".
    */
   public function testCreateGetDelete(): void {
+    // Must create a remindertype first.
     $apiParams = [
       'case_type_id' => 1,
       'case_status_id' => [1, 2],
@@ -64,39 +65,30 @@ class api_v3_CaseReminderTypeTest extends \PHPUnit\Framework\TestCase implements
       'is_active' => 1,
     ];
     $caseReminderTypeCreate = $this->callAPISuccess('CaseReminderType', 'create', $apiParams);
-    $this->assertTrue(is_numeric($caseReminderTypeCreate['id']));
-    $created = $caseReminderTypeCreate['values'][$caseReminderTypeCreate['id']];
 
-    $get = $this->callAPISuccess('CaseReminderType', 'get', []);
-    $this->assertEquals(1, $get['count'], 'There is exactly one caseremindertype now?');
+    $apiParams = [
+      'reminder_type_id' => $caseReminderTypeCreate['id'],
+    ];
+    $caseReminderJobCreate = $this->callAPISuccess('CaseReminderJob', 'create', $apiParams);
+    $this->assertTrue(is_numeric($caseReminderJobCreate['id']));
+    $created = $caseReminderJobCreate['values'][$caseReminderJobCreate['id']];
+
+    $get = $this->callAPISuccess('CaseReminderJob', 'get', []);
+    $getValues = $get['values'][$created['id']];
+
+    // 'created' is auto-populated. we don't know what it is, but it must be there.
+    $this->assertNotEmpty($getValues['created'], 'Created value was auto-populated?');
+    // since we don't know what 'created' is, we can't compare it for testing. so remove it from the test values.
+    unset($getValues['created']);
+    $this->assertEquals(1, $get['count']);
     $testParams = [];
     $testParams['id'] = $created['id'];
     $testParams += $apiParams;
-    $this->assertEquals($get['values'][$created['id']], $testParams);
+    $this->assertEquals($getValues, $testParams);
 
-    $this->callAPISuccess('CaseReminderType', 'delete', [
+    $this->callAPISuccess('CaseReminderJob', 'delete', [
       'id' => $created['id'],
     ]);
-  }
-
-  /**
-   * api should accept case_status_id values as integer or string(name)
-   */
-  public function testCaseTypeIdCanBeStringName(): void {
-    $apiParams = [
-      'case_type_id' => 'housing_support',
-      'case_status_id' => [1, 2],
-      'msg_template_id' => 1,
-      'recipient_relationship_type_id' => [-1, 14],
-      'from_email_address' => '"Mickey Mouse"<mickey@mouse.example.com>',
-      'subject' => 'Test subject',
-      'dow' => 'monday',
-      'max_iterations' => '1000',
-      'is_active' => 1,
-    ];
-    $caseReminderTypeCreate = $this->callAPISuccess('CaseReminderType', 'create', $apiParams);
-    $this->assertTrue(is_numeric($caseReminderTypeCreate['id']), 'Created entity has numeric id.');
-    $this->assertEquals(1, count($caseReminderTypeCreate['values']), 'One entity created.');
   }
 
 }

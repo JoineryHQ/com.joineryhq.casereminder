@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Casereminder</base>
+  <class>CaseReminderJobRecipientError</class>
+  <name>civicrm_case_reminder_job_recipient_error</name>
+  <comment>Errors in queue processing for job recipients</comment>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique CaseReminderJobRecipientError ID</comment>
+    <html>
+      <type>Number</type>
+    </html>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>job_recipient_id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>FK to casereminder job recipient</comment>
+    <export>true</export>
+  </field>
+  <foreignKey>
+    <name>job_recipient_id</name>
+    <table>civicrm_case_reminder_job_recipient</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>created</name>
+    <type>timestamp</type>
+    <comment>When log entry created.</comment>
+    <required>true</required>
+    <export>true</export>
+    <default>CURRENT_TIMESTAMP</default>
+    <readonly>true</readonly>    
+  </field>
+
+  <field>
+    <name>error_message</name>
+    <type>varchar</type>
+    <length>255</length>
+    <required>true</required>
+    <comment>Error message</comment>
+    <export>true</export>
+  </field>
+
+</table>
