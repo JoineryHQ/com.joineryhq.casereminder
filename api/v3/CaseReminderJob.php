@@ -10,7 +10,7 @@ use CRM_Casereminder_ExtensionUtil as E;
  * @see https://docs.civicrm.org/dev/en/latest/framework/api-architecture/
  */
 function _civicrm_api3_case_reminder_job_create_spec(&$spec) {
-  // $spec['some_parameter']['api.required'] = 1;
+  $spec['reminder_type_id']['api.required'] = 1;
 }
 
 /**
