@@ -211,7 +211,7 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
   public function postProcess() {
     if ($this->_action & CRM_Core_Action::DELETE) {
       $apiParams['id'] = $this->_id;
-      $link = _casereminder_civicrmapi('CaseReminderType', 'delete', $apiParams);
+      _casereminder_civicrmapi('CaseReminderType', 'delete', $apiParams);
       CRM_Core_Session::setStatus(E::ts('Case Reminder Type has been deleted.'), E::ts('Deleted'), 'success');
     }
     else {
