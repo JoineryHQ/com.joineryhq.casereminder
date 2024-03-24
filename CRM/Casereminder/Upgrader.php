@@ -106,8 +106,8 @@ class CRM_Casereminder_Upgrader extends CRM_Extension_Upgrader_Base {
    * @return TRUE on success
    * @throws CRM_Core_Exception
    */
-  public function upgrade_4203(): bool {
-    $this->ctx->log->info('Applying update 4202: Add queue tables');
+  public function upgrade_4205(): bool {
+    $this->ctx->log->info('Applying update 4205: Add queue tables');
     CRM_Core_DAO::executeQuery('DROP TABLE IF EXISTS `civicrm_case_reminder_job_recipient_error`');
     CRM_Core_DAO::executeQuery('DROP TABLE IF EXISTS `civicrm_case_reminder_job_recipient`');
     CRM_Core_DAO::executeQuery('DROP TABLE IF EXISTS `civicrm_case_reminder_job`');
@@ -131,6 +131,7 @@ class CRM_Casereminder_Upgrader extends CRM_Extension_Upgrader_Base {
         `job_id` int unsigned NOT NULL COMMENT 'FK to casereminder job',
         `case_id` int unsigned NOT NULL COMMENT 'FK to Case',
         `contact_id` int unsigned NOT NULL COMMENT 'FK to Contact',
+        `is_case_client` tinyint NOT NULL COMMENT 'Is this recipient the case client?',
         `relationship_type_id` int unsigned COMMENT 'Case Role relationship type',
         `sent_to` varchar(254) NULL COMMENT 'Email address to which reminder was sent (if any)',
         `status` varchar(255) COMMENT 'Standardized description of recipient status',

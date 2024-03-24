@@ -10,7 +10,10 @@ use CRM_Casereminder_ExtensionUtil as E;
  * @see https://docs.civicrm.org/dev/en/latest/framework/api-architecture/
  */
 function _civicrm_api3_case_reminder_job_recipient_create_spec(&$spec) {
-  // $spec['some_parameter']['api.required'] = 1;
+  $spec['job_id']['api.required'] = 1;
+  $spec['case_id']['api.required'] = 1;
+  $spec['contact_id']['api.required'] = 1;
+  $spec['is_case_client']['api.default'] = 0;
 }
 
 /**
@@ -24,6 +27,9 @@ function _civicrm_api3_case_reminder_job_recipient_create_spec(&$spec) {
  * @throws API_Exception
  */
 function civicrm_api3_case_reminder_job_recipient_create($params) {
+  if (!$params['is_case_client'] && empty($params['relationship_type_id'])) {
+    return civicrm_api3_create_error("Must specify relationship_type_id if not is_case_client");
+  }
   return _civicrm_api3_basic_create(_civicrm_api3_get_BAO(__FUNCTION__), $params, 'CaseReminderJobRecipient');
 }
 

@@ -61,6 +61,13 @@
     <key>id</key>
     <onDelete>CASCADE</onDelete>
   </foreignKey>
+  
+  <field>
+    <name>is_case_client</name>
+    <type>boolean</type>
+    <required>true</required>
+    <comment>Is this recipient the case client?</comment>
+  </field>
 
   <field>
     <name>relationship_type_id</name>

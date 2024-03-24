@@ -85,6 +85,7 @@ CREATE TABLE `civicrm_case_reminder_job_recipient` (
   `job_id` int unsigned NOT NULL COMMENT 'FK to casereminder job',
   `case_id` int unsigned NOT NULL COMMENT 'FK to Case',
   `contact_id` int unsigned NOT NULL COMMENT 'FK to Contact',
+  `is_case_client` tinyint NOT NULL COMMENT 'Is this recipient the case client?',
   `relationship_type_id` int unsigned COMMENT 'Case Role relationship type',
   `sent_to` varchar(254) NULL COMMENT 'Email address to which reminder was sent (if any)',
   `status` varchar(255) COMMENT 'Standardized description of recipient status',
