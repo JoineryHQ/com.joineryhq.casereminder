@@ -205,10 +205,10 @@ class CRM_Casereminder_Util_Casereminder_HeadlessTest extends \PHPUnit\Framework
       'recipient_relationship_type_id' => [-1, 14],
     ]);
 
-    $recpientList = CRM_Casereminder_Util_Casereminder::buildRecipientList($case, $reminderType);
-    $this->assertContains($this->contactIds['client'], $recpientList, 'Recipient list contains client.');
-    $this->assertContains($role14ContactId, $recpientList, 'Recipient list contains "role 14" contact.');
-    $this->assertNotContains($role12ContactId, $recpientList, 'Recipient list doees not contain "role 12" contact.');
+    $recpientRolePerCid = CRM_Casereminder_Util_Casereminder::buildRecipientList($case, $reminderType);
+    $this->assertEquals(-1, $recpientRolePerCid[$this->contactIds['client']], 'Recipient list contains role -1 for client.');
+    $this->assertEquals(14, $recpientRolePerCid[$role14ContactId], 'Recipient list contains role 14 for "role 14" contact.');
+    $this->assertArrayNotHasKey($role12ContactId, $recpientRolePerCid, 'Recipient list doees not contain "role 12" contact.');
   }
 
   public function testSplitFromEmail() {

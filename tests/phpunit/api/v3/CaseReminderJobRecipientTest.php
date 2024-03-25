@@ -127,29 +127,6 @@ class api_v3_CaseReminderJobRecipientTest extends \PHPUnit\Framework\TestCase im
     ]);
   }
 
-  public function testCreateRequiresRelationshipTypeIdIfNotIsCaseClient(): void {
-    // Create a job recipient, populating most fields.
-    $apiParams = [
-      'job_id' => $this->caseReminderJobId,
-      'case_id' => $this->caseId,
-      'contact_id' => $this->contactIds['client'],
-      'is_case_client' => '0',
-    ];
-    try {
-      $caseReminderJobRecipientCreate = $this->callAPISuccess('CaseReminderJobRecipient', 'create', $apiParams);
-    }
-    catch (Exception $e) {
-      $this->assertStringContainsString('Must specify relationship_type_id if not is_case_client', $e->getMessage(), 'API fails with "max length" error message?');
-    }
-
-    $apiParams['is_case_client'] = 1;
-    $caseReminderJobRecipientCreate = $this->callAPISuccess('CaseReminderJobRecipient', 'create', $apiParams);
-
-    $apiParams['is_case_client'] = 0;
-    $apiParams['relationship_type_id'] = 14;
-    $caseReminderJobRecipientCreate = $this->callAPISuccess('CaseReminderJobRecipient', 'create', $apiParams);
-  }
-
   public function testCreateProvidesNowDateForStatusChange(): void {
     // Create a job recipient, populating status but not status_time.
     $statusString = 'TEST_STATUS';

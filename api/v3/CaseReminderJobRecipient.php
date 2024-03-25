@@ -13,7 +13,6 @@ function _civicrm_api3_case_reminder_job_recipient_create_spec(&$spec) {
   $spec['job_id']['api.required'] = 1;
   $spec['case_id']['api.required'] = 1;
   $spec['contact_id']['api.required'] = 1;
-  $spec['is_case_client']['api.default'] = 0;
 }
 
 /**
@@ -27,9 +26,6 @@ function _civicrm_api3_case_reminder_job_recipient_create_spec(&$spec) {
  * @throws API_Exception
  */
 function civicrm_api3_case_reminder_job_recipient_create($params) {
-  if (!empty($params['is_case_client']) && empty($params['relationship_type_id'])) {
-    return civicrm_api3_create_error("Must specify relationship_type_id if not is_case_client");
-  }
   if (!empty($params['status']) && empty($params['status_time'])) {
     $params['status_time'] = CRM_Utils_Date::currentDBDate();
   }

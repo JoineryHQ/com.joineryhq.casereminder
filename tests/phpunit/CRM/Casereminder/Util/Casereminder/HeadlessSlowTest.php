@@ -149,7 +149,7 @@ class CRM_Casereminder_Util_Casereminder_HeadlessSlowTest extends \PHPUnit\Frame
     $reminderType = $this->createCaseReminderType($reminderTypeParams);
 
     $sendingParams = CRM_Casereminder_Util_Casereminder::prepCaseReminderSendingParams($case, $reminderType);
-    $recipientCids = CRM_Casereminder_Util_Casereminder::buildRecipientList($case, $reminderType);
+    $recipientRolePerCid = CRM_Casereminder_Util_Casereminder::buildRecipientList($case, $reminderType);
 
     // Get the latest case data for comparison (sending an email will modify the case, after
     // tokens are processed, so we want these values now.)
@@ -168,7 +168,7 @@ class CRM_Casereminder_Util_Casereminder_HeadlessSlowTest extends \PHPUnit\Frame
      * NOTE: This will fail if we don't properly alter lines in other people's code.
      * See TESTING.md.
      */
-    CRM_Casereminder_Util_Casereminder::sendCaseReminder($case['id'], $reminderType['id'], $recipientCids, $sendingParams);
+    CRM_Casereminder_Util_Casereminder::sendCaseReminder($case['id'], $reminderType['id'], $recipientRolePerCid, $sendingParams);
 
     $mailingGetDefaultParams = [
       'sequential' => 1,
