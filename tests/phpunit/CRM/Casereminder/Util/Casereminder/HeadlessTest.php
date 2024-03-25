@@ -238,7 +238,7 @@ class CRM_Casereminder_Util_Casereminder_HeadlessTest extends \PHPUnit\Framework
     ];
     $reminderType = $this->createCaseReminderType($reminderTypeParams);
 
-    $actualParams = CRM_Casereminder_Util_Casereminder::prepCaseReminderSendingParams($case, $reminderType);
+    $actualParams = CRM_Casereminder_Util_Casereminder::prepCaseReminderSendingParams($case['id'], $reminderType);
     $expectedParams = [
       'template_id' => $reminderTypeParams['msg_template_id'],
       'case_id' => $case['id'],

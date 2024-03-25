@@ -87,6 +87,7 @@ class api_v3_CaseReminderJobRecipientErrorTest extends \PHPUnit\Framework\TestCa
       'case_id' => $this->caseId,
       'contact_id' => $this->contactIds['client'],
       'relationship_type_id' => 14,
+      'is_case_client' => 0,
       'sent_to' => $this->caseClientEmail,
       'status' => 'this is a status string',
       'status_time' => CRM_Utils_Date::mysqlToIso(CRM_Utils_Date::currentDBDate()),

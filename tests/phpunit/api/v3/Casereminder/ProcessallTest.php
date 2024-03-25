@@ -121,6 +121,9 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
   }
 
   public static function stupidCleanupCheck() {
+    // This is stupid. Anyway, uncomment the return line below if you want to get
+    // output in the terminal for the status of this cleanup.
+    return;
     $query = "
       select count(*) as cnt, 'civicrm_case_reminder_job' as tablename from civicrm_case_reminder_job
       UNION
@@ -337,9 +340,12 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
 
     $apiResult = $this->callAPISuccess('Casereminder', 'processAll');
     $expected = [
-      'reminderTypesProcessed' => 2,
+      'totalReminderTypesProcessed' => 2,
       'totalCasesProcessed' => 4,
-      'totalRemindersProcessed' => 4,
+      'totalReminderTypesProcessed' => 2,
+      'totalRecipientsEnqueued' => 4,
+      'totalRemindersSent' => 0,
+      'totalRemindersSent-info' => NULL,
     ];
     $this->assertEquals($expected, $apiResult['values'], 'API brief results are correct?');
   }
@@ -397,9 +403,11 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
 
     $values = $apiResult['values'];
     $expectedSummary = [
-      'reminderTypesProcessed' => 2,
+      'totalReminderTypesProcessed' => 2,
       'totalCasesProcessed' => 4,
-      'totalRemindersProcessed' => 4,
+      'totalRecipientsEnqueued' => 4,
+      'totalRemindersSent' => 0,
+      'totalRemindersSent-info' => NULL,
     ];
 
     $this->assertEquals($expectedSummary, $values['summary'], 'API verbose "summary" results are correct?');
