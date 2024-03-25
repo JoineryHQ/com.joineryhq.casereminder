@@ -111,13 +111,15 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
     // What's breaking the rollbacks? Some quick trial-and-error indicates that
     // it's something in the Queue runner (CRM_Queue_Runner::runNext()).
     // Maybe we'll figure that out later.
-    CRM_Core_DAO::executeQuery('DELETE FROM  civicrm_case');
-    CRM_Core_DAO::executeQuery('DELETE FROM  civicrm_case_reminder_job');
-    CRM_Core_DAO::executeQuery('DELETE FROM  civicrm_case_reminder_job_recipient');
-    CRM_Core_DAO::executeQuery('DELETE FROM  civicrm_case_reminder_job_recipient_error');
-    CRM_Core_DAO::executeQuery('DELETE FROM  civicrm_case_reminder_log_case');
-    CRM_Core_DAO::executeQuery('DELETE FROM  civicrm_case_reminder_log_type');
-    CRM_Core_DAO::executeQuery('DELETE FROM  civicrm_case_reminder_type');
+    CRM_Core_DAO::executeQuery('DELETE FROM civicrm_case');
+    CRM_Core_DAO::executeQuery('DELETE FROM civicrm_case_reminder_job');
+    CRM_Core_DAO::executeQuery('DELETE FROM civicrm_case_reminder_job_recipient');
+    CRM_Core_DAO::executeQuery('DELETE FROM civicrm_case_reminder_job_recipient_error');
+    CRM_Core_DAO::executeQuery('DELETE FROM civicrm_case_reminder_log_case');
+    CRM_Core_DAO::executeQuery('DELETE FROM civicrm_case_reminder_log_type');
+    CRM_Core_DAO::executeQuery('DELETE FROM civicrm_case_reminder_type');
+    CRM_Core_DAO::executeQuery('DELETE FROM civicrm_queue');
+    CRM_Core_DAO::executeQuery('DELETE FROM civicrm_queue_item');
   }
 
   public static function stupidCleanupCheck() {
@@ -344,7 +346,7 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
       'totalCasesProcessed' => 4,
       'totalReminderTypesProcessed' => 2,
       'totalRecipientsEnqueued' => 4,
-      'totalRemindersSent' => 0,
+      'totalRemindersSent' => 4,
       'totalRemindersSent-info' => NULL,
     ];
     $this->assertEquals($expected, $apiResult['values'], 'API brief results are correct?');
@@ -406,7 +408,7 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
       'totalReminderTypesProcessed' => 2,
       'totalCasesProcessed' => 4,
       'totalRecipientsEnqueued' => 4,
-      'totalRemindersSent' => 0,
+      'totalRemindersSent' => 4,
       'totalRemindersSent-info' => NULL,
     ];
 
