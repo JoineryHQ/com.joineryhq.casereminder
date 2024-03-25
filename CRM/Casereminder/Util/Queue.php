@@ -171,7 +171,6 @@ class CRM_Casereminder_Util_Queue {
 
   public static function processQueue() {
     // FIXME: refactor to new Queue class.
-
     // Acquire lock or return special "cannot get lock" value of -1.
     $casereminderLock = Civi::lockManager()->acquire('worker.casereminder.processqueue');
     if (!$casereminderLock->isAcquired()) {
@@ -192,8 +191,8 @@ class CRM_Casereminder_Util_Queue {
 
     while ($taskResult['is_continue']) {
       $taskResult = $runner->runNext();
-
-      if (\Civi::$statics[__CLASS__]['sentCount'] >= \Civi::settings()->get('mailerBatchLimit')) {
+      $mailerBatchLimit = \Civi::settings()->get('mailerBatchLimit');
+      if ($mailerBatchLimit && \Civi::$statics[__CLASS__]['sentCount'] >= $mailerBatchLimit) {
         // We've hit our limit. Stop here. We'll pick up remaining queued tasks next time.
         break;
       }
@@ -234,9 +233,6 @@ class CRM_Casereminder_Util_Queue {
 
     $emailSendValues = self::extractEmailSendValues($emailSend);
     self::countEmailIfSent($emailSendValues);
-    if ($emailSendValues['sent']) {
-      \Civi::$statics[__CLASS__]['sentCount']++;
-    }
 
     $updateRecipientParams['sent_to'] = $emailSendValues['emailAddress'];
     $updateRecipientParams['status'] = self::calculateRecipientStatus($isError, $recipient['job_id']);
