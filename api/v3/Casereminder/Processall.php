@@ -58,10 +58,10 @@ function civicrm_api3_casereminder_Processall($params) {
       $nowReminderTypeId = $nowReminderType['id'];
       $verboseReturnValues['casesPerReminderType'][$nowReminderTypeId]['caseIds'] = [];
       CRM_Casereminder_Util_Log::logReminderType($nowReminderTypeId, CRM_Casereminder_Util_Log::ACTION_REMINDER_TYPE_BEGIN);
-      
+
       // Create queue job for this remindertype:
       $caseReminderJob = CRM_Casereminder_Util_Queue::createReminderJob($nowReminderTypeId);
-      
+
       // Get cases matching this reminder type.
       $reminderTypeCases = CRM_Casereminder_Util_Casereminder::getReminderTypeCases($nowReminderType);
       foreach ($reminderTypeCases as $reminderTypeCase) {
@@ -72,7 +72,7 @@ function civicrm_api3_casereminder_Processall($params) {
           $recipientRolePerCid = CRM_Casereminder_Util_Casereminder::buildRecipientList($reminderTypeCase, $nowReminderType);
           $sendingParams = CRM_Casereminder_Util_Casereminder::prepCaseReminderSendingParams($reminderTypeCase['id'], $nowReminderType);
           $enqueuedRecipientsCount = CRM_Casereminder_Util_Queue::enqueueCaseReminderRecipients($reminderTypeCase['id'], $recipientRolePerCid, $sendingParams, $caseReminderJob['id']);
-    
+
           CRM_Casereminder_Util_Log::logReminderCase($nowReminderTypeId, CRM_Casereminder_Util_Log::ACTION_CASE_SEND, $reminderTypeCase['id']);
 
           $briefReturnValues['totalRecipientsEnqueued'] += $enqueuedRecipientsCount;
@@ -89,6 +89,8 @@ function civicrm_api3_casereminder_Processall($params) {
   // Now we've enqueued all appropriate recipients at the present moment; next, process the queue; this will include
   // any queued recipients that are still waiting from a previous invocation.
   $processQueueRet = CRM_Casereminder_Util_Queue::processQueue();
+  CRM_Casereminder_Util_Casereminder::updateJobStatuses();
+
   if ($processQueueRet == -1) {
     $briefReturnValues['totalRemindersSent'] = 0;
     $briefReturnValues['totalRemindersSent-info'] = E::ts('Could not acquire lock. Is another job processing the queue?');

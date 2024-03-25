@@ -69,7 +69,7 @@ class CRM_Casereminder_Util_Casereminder {
     return $params;
   }
 
-  public static function buildRecipientList($case, $reminderType) : array{
+  public static function buildRecipientList($case, $reminderType) : array {
 
     // Case probably lacks the 'contacts' attribute, because it was created
     // (in self::getReminderTypeCases()) by case.get api without specifying an
@@ -185,6 +185,48 @@ class CRM_Casereminder_Util_Casereminder {
     $caseReminderLogCaseCount = _casereminder_civicrmapi('CaseReminderLogCase', 'getcount', $apiParams);
     return ($caseReminderLogCaseCount >= $maxIterations);
 
+  }
+
+  public static function updateJobStatuses() {
+    $unfinishedJobs = _casereminder_civicrmapi('caseReminderJob', 'get', [
+      'end' => ['IS NULL' => 1],
+      'options' => ['limit' => 0],
+    ]);
+    foreach ($unfinishedJobs['values'] as $unfinishedJob) {
+      $jobUpdateParams = [];
+      if (empty($unfinishedJob['started'])) {
+        $caseReminderJobRecipientCountDone = _casereminder_civicrmapi('caseReminderJobRecipient', 'getcount', [
+          'job_id' => $unfinishedJob['id'],
+          'status' => [
+            'IN' => [
+              CRM_Casereminder_Util_Queue::R_STATUS_DONE,
+              CRM_Casereminder_Util_Queue::R_STATUS_QUEUED_ERROR,
+              CRM_Casereminder_Util_Queue::R_STATUS_FAILED,
+            ],
+          ],
+        ]);
+        if ($caseReminderJobRecipientCountDone) {
+          $jobUpdateParams['start'] = 'now';
+        }
+      }
+      $caseReminderJobRecipientCountNotDone = _casereminder_civicrmapi('caseReminderJobRecipient', 'getcount', [
+        'job_id' => $unfinishedJob['id'],
+        'status' => [
+          'NOT IN' => [
+            CRM_Casereminder_Util_Queue::R_STATUS_DONE,
+            CRM_Casereminder_Util_Queue::R_STATUS_FAILED,
+          ],
+        ],
+      ]);
+      if (!$caseReminderJobRecipientCountNotDone) {
+        $jobUpdateParams['end'] = 'now';
+      }
+
+      if (!empty($jobUpdateParams)) {
+        $jobUpdateParams['id'] = $unfinishedJob['id'];
+        _casereminder_civicrmapi('caseReminderJob', 'create', $jobUpdateParams);
+      }
+    }
   }
 
 }
