@@ -92,7 +92,6 @@ class CRM_Casereminder_Util_Casereminder {
 
     return FALSE;
     throw new CRM_Extension_Exception('foobar');
-    $mailerSettings = CRM_Casereminder_Util_MailerSettings::singleton();
 
     $ret = 0;
     foreach ($recipientCids as $recipientCid) {
@@ -107,7 +106,7 @@ class CRM_Casereminder_Util_Casereminder {
         $ret++;
       }
       CRM_Casereminder_Util_Token::setTokenEnvCaseId(NULL);
-      usleep($mailerSettings->get('mailThrottleTime'));
+      usleep(\Civi::settings()->get('mailThrottleTime'));
     }
     CRM_Casereminder_Util_Log::logReminderCase($reminderTypeId, CRM_Casereminder_Util_Log::ACTION_CASE_SEND, $caseId);
     return $ret;
@@ -282,7 +281,6 @@ class CRM_Casereminder_Util_Casereminder {
     $taskResult = $runner->formatTaskResult(TRUE);
     $itemSuccessCount = 0;
 
-    $mailerSettings = CRM_Casereminder_Util_MailerSettings::singleton();
     $emailSendCount = 0;
 
     while ($taskResult['is_continue']) {
@@ -298,7 +296,7 @@ class CRM_Casereminder_Util_Casereminder {
       //          some small amount.
       //        - If our count exceeds 'mailerBatchLimit', we should stop processing here.
 
-      if ($itemSuccessCount >= $mailerSettings->get('mailerBatchLimit')) {
+      if ($itemSuccessCount >= \Civi::settings()->get('mailerBatchLimit')) {
         break;
       }
     }
