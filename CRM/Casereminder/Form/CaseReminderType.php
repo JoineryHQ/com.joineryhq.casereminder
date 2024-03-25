@@ -10,6 +10,18 @@ use Civi\Token\TokenProcessor;
  */
 class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
 
+  public static function getDowOptions() {
+    return [
+      'sunday' => E::ts('Sunday'),
+      'monday' => E::ts('Monday'),
+      'tuesday' => E::ts('Tuesday'),
+      'wednesday' => E::ts('Wednesday'),
+      'thursday' => E::ts('Thursday'),
+      'friday' => E::ts('Friday'),
+      'saturday' => E::ts('Saturday'),
+    ];
+  }
+
   /**
    * Explicitly declare the entity api name.
    */
@@ -131,15 +143,8 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
         TRUE
       );
 
-      $dowOptions = [
-        'sunday' => E::ts('Sunday'),
-        'monday' => E::ts('Monday'),
-        'tuesday' => E::ts('Tuesday'),
-        'wednesday' => E::ts('Wednesday'),
-        'thursday' => E::ts('Thursday'),
-        'friday' => E::ts('Friday'),
-        'saturday' => E::ts('Saturday'),
-      ];
+      $dowOptions = self::getDowOptions();
+
       $this->add(
         // field type
         'select',
@@ -177,8 +182,8 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
     CRM_Core_Resources::singleton()->addStyleFile('casereminder', 'css/CRM_Casereminder_Form_CaseReminderType.css');
     // Add js file
     CRM_Core_Resources::singleton()->addScriptFile('casereminder', 'js/CRM_Casereminder_Form_CaseReminderType.js');
-    
-    CRM_Mailing_BAO_Mailing::commonCompose($this);    
+
+    CRM_Mailing_BAO_Mailing::commonCompose($this);
   }
 
   /**
@@ -375,5 +380,4 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
     return ['contactId'];
   }
 
-  
 }

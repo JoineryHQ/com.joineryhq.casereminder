@@ -27,6 +27,7 @@
                 <th id="sortable">{ts}Template{/ts}</th>
                 <th id="sortable">{ts}Recipients{/ts}</th>
                 <th id="sortable">{ts}Subject{/ts}</th>
+                <th id="sortable">{ts}Send On{/ts}</th>
                 <th></th>
               </tr>
             </thead>
@@ -53,6 +54,7 @@
                     {/foreach}
                   </td>
                   <td class="crm-caseremindertype-subject" data-field="subject">{$row.subject}</td>
+                  <td class="crm-caseremindertype-dow" data-field="dow">{$row.dow}</td>
                   <td>{$row.extraAction|replace:'xx':$row.id}{$row.action|replace:'xx':$row.id}</td>
                 </tr>
               {/foreach}

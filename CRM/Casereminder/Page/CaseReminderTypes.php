@@ -83,9 +83,11 @@ class CRM_Casereminder_Page_CaseReminderTypes extends CRM_Core_Page_Basic {
     // Get rows per parent method.
     $rows = parent::getRows($sort, $action, $links);
     // Parse some row values uniquely for this template.
+    $dowOptions = CRM_Casereminder_Form_CaseReminderType::getDowOptions();
     foreach ($rows as $rowId => &$row) {
       $row['case_status_id'] = CRM_Utils_Array::explodePadded($row['case_status_id']);
       $row['recipient_relationship_type_id'] = CRM_Utils_Array::explodePadded($row['recipient_relationship_type_id']);
+      $row['dow'] = ($dowOptions[$row['dow']] ?? '');
       // Do replacement of '%%id%%' for angular params.
       $replaceValues = ['id' => $rowId];
       CRM_Core_Action::replace($row['action'], $replaceValues);
