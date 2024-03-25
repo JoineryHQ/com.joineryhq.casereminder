@@ -41,6 +41,14 @@ class CRM_Casereminder_Page_CaseReminderTypes extends CRM_Core_Page_Basic {
           'qs' => 'action=delete&id=%%id%%',
           'title' => E::ts('Delete Case Reminder Type'),
         ),
+        (CRM_Core_Action::ADVANCED) => array(
+          'name' => E::ts('Report'),
+          // insert angular parameters in 'url'. CiviCRM action links won't be correctly formatted for angular if you use 'qs'.
+          // Note we'll have to replace '%%id%%' in self::getRows().
+          'url' => '/civicrm/admin/casereminder/jobs#/?reminderType=%%id%%',
+          'title' => E::ts('View jobs'),
+          'class' => 'no-popup',
+        ),
       );
     }
     return self::$_links;
@@ -59,13 +67,6 @@ class CRM_Casereminder_Page_CaseReminderTypes extends CRM_Core_Page_Basic {
   public function browse() {
     parent::browse();
 
-    $rows = $this->get_template_vars('rows');
-    foreach ($rows as &$row) {
-      $row['case_status_id'] = CRM_Utils_Array::explodePadded($row['case_status_id']);
-      $row['recipient_relationship_type_id'] = CRM_Utils_Array::explodePadded($row['recipient_relationship_type_id']);
-    }
-    ksort($rows);
-    $this->assign('rows', $rows);
     $this->assign('case_type_options', CRM_Case_BAO_Case::buildOptions('case_type_id'));
     $this->assign('case_status_options', CRM_Case_BAO_Case::buildOptions('case_status_id'));
     $this->assign('msg_template_options', CRM_Core_BAO_MessageTemplate::getMessageTemplates(FALSE));
@@ -73,6 +74,25 @@ class CRM_Casereminder_Page_CaseReminderTypes extends CRM_Core_Page_Basic {
       array(E::ts('Case Contact') => -1),
       array_flip(CRM_Contact_BAO_Relationship::buildOptions('relationship_type_id'))
     )));
+  }
+
+  /**
+   * @inheritDoc
+   */
+  protected function getRows($sort, $action, array $links): array {
+    // Get rows per parent method.
+    $rows = parent::getRows($sort, $action, $links);
+    // Parse some row values uniquely for this template.
+    foreach ($rows as $rowId => &$row) {
+      $row['case_status_id'] = CRM_Utils_Array::explodePadded($row['case_status_id']);
+      $row['recipient_relationship_type_id'] = CRM_Utils_Array::explodePadded($row['recipient_relationship_type_id']);
+      // Do replacement of '%%id%%' for angular params.
+      $replaceValues = ['id' => $rowId];
+      CRM_Core_Action::replace($row['action'], $replaceValues);
+    }
+    // Sort rows by ID.
+    ksort($rows);
+    return $rows;
   }
 
   /**
