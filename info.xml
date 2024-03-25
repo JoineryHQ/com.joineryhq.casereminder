@@ -40,5 +40,7 @@
   <upgrader>CRM_Casereminder_Upgrader</upgrader>
   <requires>
     <ext>org.civicoop.emailapi</ext>
+    <ext>org.civicrm.search_kit</ext>
+    <ext>org.civicrm.afform</ext>
   </requires>
 </extension>
