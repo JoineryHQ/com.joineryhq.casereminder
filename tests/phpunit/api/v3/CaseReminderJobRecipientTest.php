@@ -128,7 +128,7 @@ class api_v3_CaseReminderJobRecipientTest extends \PHPUnit\Framework\TestCase im
   }
 
   public function testCreateRequiresRelationshipTypeIdIfNotIsCaseClient(): void {
-    // Create a job recipient, populating all fields.
+    // Create a job recipient, populating most fields.
     $apiParams = [
       'job_id' => $this->caseReminderJobId,
       'case_id' => $this->caseId,
@@ -141,13 +141,36 @@ class api_v3_CaseReminderJobRecipientTest extends \PHPUnit\Framework\TestCase im
     catch (Exception $e) {
       $this->assertStringContainsString('Must specify relationship_type_id if not is_case_client', $e->getMessage(), 'API fails with "max length" error message?');
     }
-    
+
     $apiParams['is_case_client'] = 1;
     $caseReminderJobRecipientCreate = $this->callAPISuccess('CaseReminderJobRecipient', 'create', $apiParams);
-    
+
     $apiParams['is_case_client'] = 0;
     $apiParams['relationship_type_id'] = 14;
     $caseReminderJobRecipientCreate = $this->callAPISuccess('CaseReminderJobRecipient', 'create', $apiParams);
+  }
+
+  public function testCreateProvidesNowDateForStatusChange(): void {
+    // Create a job recipient, populating status but not status_time.
+    $statusString = 'TEST_STATUS';
+    $apiParams = [
+      'job_id' => $this->caseReminderJobId,
+      'case_id' => $this->caseId,
+      'contact_id' => $this->contactIds['client'],
+      'is_case_client' => '0',
+      'status' => $statusString,
+    ];
+    $caseReminderJobRecipientCreate = $this->callAPISuccess('CaseReminderJobRecipient', 'create', $apiParams);
+    $caseReminderJobRecipient = $this->callAPISuccess('CaseReminderJobRecipient', 'getsingle', ['id' => $caseReminderJobRecipientCreate['id']]);
+
+    $this->assertEquals($statusString, $caseReminderJobRecipient['status'], 'Status was saved correctly?');
+
+    $nowSeconds = strtotime(CRM_Utils_Date::currentDBDate());
+    $statusSeconds = strtotime($caseReminderJobRecipient['status_time']);
+    $diffSeconds = ($nowSeconds - $statusSeconds);
+    $this->assertLessThan(3, $diffSeconds);
+
+    return;
   }
 
 }
