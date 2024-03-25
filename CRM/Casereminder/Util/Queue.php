@@ -79,7 +79,7 @@ class CRM_Casereminder_Util_Queue {
   }
 
   public static function jobIsOld(int $jobId) : bool {
-    $job = _casereminder_civicrmapi('caseReminderJob', 'getsingle', $jobId);
+    $job = _casereminder_civicrmapi('caseReminderJob', 'getsingle', ['id' => $jobId]);
     $jobCratedSeconds = strtotime($job['created']);
     $nowSeconds = time();
     return (($nowSeconds - $jobCratedSeconds) > self::MAX_JOB_AGE_SECONDS);
@@ -242,7 +242,7 @@ class CRM_Casereminder_Util_Queue {
     usleep(\Civi::settings()->get('mailThrottleTime'));
 
     // If this recipient had an error but remains in the queue for later processing,
-    // we'll return false.Queue runner will try this one again later.
+    // we'll return false. Queue runner will try this one again later.
     // Otherwise, the recipient was either processed successfully or
     // is too old to bother with. Return true. Queue runner will remove it from the queue.
     return ($updateRecipientParams['status'] != self::R_STATUS_QUEUED_ERROR);
