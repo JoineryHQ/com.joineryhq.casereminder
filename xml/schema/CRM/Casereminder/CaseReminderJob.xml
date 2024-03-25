@@ -6,6 +6,9 @@
   <name>civicrm_case_reminder_job</name>
   <comment>FIXME</comment>
   <log>true</log>
+  <paths>
+    <view>/civicrm/admin/casereminder/jobrecipients#/?job=[id]</view>
+  </paths>
 
   <field>
     <name>id</name>

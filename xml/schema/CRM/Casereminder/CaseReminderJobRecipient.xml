@@ -6,6 +6,9 @@
   <name>civicrm_case_reminder_job_recipient</name>
   <comment>FIXME</comment>
   <log>true</log>
+  <paths>
+    <view>/civicrm/admin/casereminder/jobrecipientErrors#/?recipientId=[id]</view>
+  </paths>
 
   <field>
     <name>id</name>
