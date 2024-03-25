@@ -1,0 +1,18 @@
+<div ng-hide="routeParams.job">
+No Case Reminder Job specified. Please visit Case Reminder Types.
+</div>
+<a class="btn btn-primary" href="/civicrm/admin/casereminder/types">
+  <i class="crm-i fa-chevron-left"/> Case Reminder Types
+</a>
+<div ng-show="routeParams.job">
+  
+
+  <div af-fieldset="" af-title="Case Reminder Job Report">
+  <crm-search-display-list search-name="Case_Reminder_Job_Recipients_Job_Info" display-name="Case_Reminder_Job_Recipients_Job_Info_List_1" filters="{id: routeParams.job}"/>
+  </div>
+  <div af-fieldset="" af-title="Job Recipients">
+  <crm-search-display-table search-name="Case_Reminder_Job_Recipients" display-name="Case_Reminder_Job_Recipients_Table_1" filters="{'CaseReminderJobRecipient_CaseReminderJob_job_id_01.id': routeParams.job}"/>
+  </div>
+
+
+</div>
