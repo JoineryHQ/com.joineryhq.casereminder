@@ -64,13 +64,6 @@ class CRM_Casereminder_Util_Queue {
     return $caseReminderJobRecipient;
   }
 
-  public static function updateRecipientStatus(int $recipientId, string $status) : void {
-    _casereminder_civicrmapi('caseReminderJobRecipient', 'create', [
-      'id' => $recipientId,
-      'status' => $status,
-    ]);
-  }
-
   public static function createRecipientError(int $recipientId, string $errorMessage) : void {
     _casereminder_civicrmapi('caseReminderJobRecipientError', 'create', [
       'job_recipient_id' => $recipientId,
