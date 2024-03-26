@@ -7,7 +7,10 @@ The extension is licensed under [GPL-3.0](LICENSE.txt).
 ## Requirements
 
 * CiviCRM >= 5.65.1
-
+* Extensions:
+  * EmailApi (org.civicoop.emailapi)
+  * SearchKit (org.civicrm.search_kit)
+  * Form Core (org.civicrm.afform)
 
 ## Usage
 TBD
