@@ -33,14 +33,6 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
       ->apply();
   }
 
-  public static function setUpBeforeClass(): void {
-    self::stupidCleanup();
-  }
-
-  public static function tearDownAfterClass(): void {
-    self::stupidCleanup();
-  }
-
   /**
    * The setup() method is executed before the test is executed (optional).
    */
@@ -53,21 +45,7 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
       return;
     }
 
-    parent::setUp();
-  }
-
-  /**
-   * The tearDown() method is executed after the test was executed (optional)
-   * This can be used for cleanup.
-   */
-  public function tearDown(): void {
-    parent::tearDown();
-    $this->stupidCleanup();
-  }
-
-  public function stupidSetup() {
-    // See also: self::stupidCleanup().
-    self::stupidCleanup();
+    self::stupidCleanup(__FUNCTION__);
     self::stupidCleanupCheck();
 
     $this->setupCasereminderTests();
@@ -96,9 +74,36 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
     $this->cases[1] = $this->createCase($this->contactIds['creator'], $this->contactIds['client'], []);
     $this->cases[2] = $this->createCase($this->contactIds['creator'], $this->contactIds['client'], []);
 
+    parent::setUp();
   }
 
-  public static function stupidCleanup() {
+  /**
+   * The tearDown() method is executed after the test was executed (optional)
+   * This can be used for cleanup.
+   */
+  public function tearDown(): void {
+    parent::tearDown();
+  }
+
+  public static function tearDownAfterClass(): void {
+    parent::tearDownAfterClass();
+    self::stupidCleanup(__FUNCTION__);
+    self::stupidCleanupCheck();
+  }
+
+  public static function stupidCleanup($callerName = NULL) {
+    $supportedCallers = [
+      'setUp',
+      'tearDownAfterClass',
+    ];
+    if (!in_array($callerName, $supportedCallers)) {
+      return;
+    }
+
+    // Uncomment for help in debugging the "stupidCleanup" problem (documented below).
+    // $bt = debug_backtrace();
+    // var_dump('>>>>>>>>>>>>>>>>>>> '. $bt[2]['function'] . ' -> ' . $bt[1]['function'] . ' -> ' . __FUNCTION__);
+
     // Something in these tests is breaking transaction rollbacks, so we'll just
     // brute-force cleanup all of our tables. This probably still leaves dirty
     // data in places like civicrm_contact, but we're not testing there.
@@ -126,6 +131,9 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
     // This is stupid. Anyway, uncomment the return line below if you want to get
     // output in the terminal for the status of this cleanup.
     return;
+    $bt = debug_backtrace();
+    var_dump('=================== ' . $bt[2]['function'] . ' -> ' . $bt[1]['function'] . ' -> ' . __FUNCTION__);
+
     $query = "
       select count(*) as cnt, 'civicrm_case_reminder_job' as tablename from civicrm_case_reminder_job
       UNION
@@ -156,7 +164,6 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
       $this->addWarning("CASEREMINDER_TESTING_COVER_EXTERNAL is NOT set; this test has been skipped. See TESTING.md");
       return;
     }
-    $this->stupidSetup();
 
     $nowReminderTypes = CRM_Casereminder_Util_Casereminder::getNowReminderTypes();
     $this->assertEquals(2, count($nowReminderTypes), 'After setup(): Two nowReminderTypes found?');
@@ -267,7 +274,6 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
       $this->addWarning("CASEREMINDER_TESTING_COVER_EXTERNAL is NOT set; this test has been skipped. See TESTING.md");
       return;
     }
-    $this->stupidSetup();
 
     // Create a reminderType with max_iterations=1. This should cause reminders
     // to be sent for all cases (case1 and case2), but only the first time.
@@ -338,7 +344,6 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
       $this->addWarning("CASEREMINDER_TESTING_COVER_EXTERNAL is NOT set; this test has been skipped. See TESTING.md");
       return;
     }
-    $this->stupidSetup();
 
     $apiResult = $this->callAPISuccess('Casereminder', 'processAll');
     $expected = [
@@ -363,7 +368,6 @@ class api_v3_Casereminder_ProcessallTest extends \PHPUnit\Framework\TestCase imp
       $this->addWarning("CASEREMINDER_TESTING_COVER_EXTERNAL is NOT set; this test has been skipped. See TESTING.md");
       return;
     }
-    $this->stupidSetup();
 
     $apiResult = $this->callAPISuccess('Casereminder', 'processAll', ['verbose' => TRUE]);
 
