@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <extension key="casereminder" type="module">
   <file>casereminder</file>
-  <name>casereminder</name>
+  <name>Case Reminders</name>
   <description>CiviCRM: Case Reminders</description>
   <license>GPL-3.0</license>
   <maintainer>
@@ -16,7 +16,7 @@
   </urls>
   <releaseDate>2024-03-26</releaseDate>
   <version>0.1.0</version>
-  <develStage>alpha</develStage>
+  <develStage>beta</develStage>
   <compatibility>
     <ver>5.65</ver>
   </compatibility>
