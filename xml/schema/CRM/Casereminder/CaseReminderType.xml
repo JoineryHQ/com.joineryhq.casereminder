@@ -6,6 +6,11 @@
   <name>civicrm_case_reminder_type</name>
   <comment>Case Reminder configurations per reminder type</comment>
   <log>true</log>
+  <paths>
+    <view>/civicrm/admin/casereminder/jobs#/?reminderType=[id]</view>
+    <add>/civicrm/admin/casereminder/type/?action=add&amp;reset=1</add>
+    <update>/civicrm/admin/casereminder/type/?action=update&amp;reset=1&amp;id=[id]</update>
+  </paths>
 
   <field>
     <name>id</name>
@@ -31,12 +36,19 @@
     <table>civicrm_case_type</table>
     <key>id</key>
     <onDelete>CASCADE</onDelete>
+    <pseudoconstant>
+      <optionGroupName>case_type</optionGroupName>
+    </pseudoconstant>
   </foreignKey>
 
   <field>
     <name>case_status_id</name>
     <type>varchar</type>
     <length>256</length>
+    <pseudoconstant>
+      <optionGroupName>case_status</optionGroupName>
+    </pseudoconstant>
+    <serialize>SEPARATOR_TRIMMED</serialize>
     <comment>Case status ID(s), multi-value delimited. Implicit FK to civicrm_option_value where option_group = case_status.</comment>
   </field>
 
@@ -51,45 +63,48 @@
     <key>id</key>
     <onDelete>SET NULL</onDelete>
   </foreignKey>
-	
+
   <field>
     <name>recipient_relationship_type_id</name>
     <type>varchar</type>
     <length>256</length>
     <comment>Relationship type ID(s) for recipients, multi-value delimited. Implicit FK to civicrm_relationship_type. -1 is Case Contact.</comment>
-  </field>    
-  
+  </field>
+
   <field>
     <name>from_email_address</name>
     <type>varchar</type>
     <length>256</length>
     <comment>Email address selected from domain list of From addresses.</comment>
   </field>
-  
+
   <field>
     <name>subject</name>
     <type>varchar</type>
     <length>128</length>
     <comment>Subject of reminder email</comment>
   </field>
-  
+
   <field>
     <name>dow</name>
     <type>varchar</type>
     <length>64</length>
+    <pseudoconstant>
+      <callback>CRM_Casereminder_Form_CaseReminderType::getDowOptions</callback>
+    </pseudoconstant>
     <comment>Day of week to send reminders</comment>
   </field>
-  
+
   <field>
     <name>max_iterations</name>
     <type>int unsigned</type>
     <comment>Maximum number of times to send a reminder of this type on any given case.</comment>
   </field>
-  
+
   <field>
     <name>is_active</name>
     <type>boolean</type>
     <comment>Is this reminder type active?</comment>
   </field>
-</table> 
+</table>
 
