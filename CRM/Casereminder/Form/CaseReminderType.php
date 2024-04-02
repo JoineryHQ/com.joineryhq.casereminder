@@ -324,7 +324,19 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
     $buildOptions = [
       '-1' => E::ts('Case client'),
     ];
-    $buildOptions += $this->filterOptionsByCaseOptions(CRM_Contact_BAO_Relationship::buildOptions('relationship_type_id'), $caseRoleValuesByTypeId);
+    $relationshipTypeGet = _casereminder_civicrmapi('relationshipType', 'get', [
+      'is_active' => 1,
+      'options' => [
+        'sort' => 'label_a_b ASC',
+        'limit' => 0,
+      ],
+    ]);
+    $coreOptions = [];
+    foreach ($relationshipTypeGet['values'] as $relationshipType) {
+      $coreOptions[$relationshipType['id']] = E::ts('Role') . ": {$relationshipType['label_a_b']} / {$relationshipType['label_b_a']}";
+    }
+
+    $buildOptions += $this->filterOptionsByCaseOptions($coreOptions, $caseRoleValuesByTypeId);
     return array_flip($buildOptions);
   }
 
