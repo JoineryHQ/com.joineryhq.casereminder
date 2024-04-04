@@ -25,4 +25,37 @@ class CRM_Casereminder_BAO_CaseReminderType extends CRM_Casereminder_DAO_CaseRem
     return NULL;
   }
 
+  public static function getDowOptions() {
+    return [
+      'sunday' => E::ts('Sunday'),
+      'monday' => E::ts('Monday'),
+      'tuesday' => E::ts('Tuesday'),
+      'wednesday' => E::ts('Wednesday'),
+      'thursday' => E::ts('Thursday'),
+      'friday' => E::ts('Friday'),
+      'saturday' => E::ts('Saturday'),
+    ];
+  }
+
+  public static function getRecipientOptions() {
+    $caseRoleValuesByTypeId = CRM_Casereminder_Util_Caseremindertype::getCaseRoleValuesByTypeId();
+    $buildOptions = [
+      '-1' => E::ts('Case client'),
+    ];
+    $relationshipTypeGet = _casereminder_civicrmapi('relationshipType', 'get', [
+      'is_active' => 1,
+      'options' => [
+        'sort' => 'label_a_b ASC',
+        'limit' => 0,
+      ],
+    ]);
+    $coreOptions = [];
+    foreach ($relationshipTypeGet['values'] as $relationshipType) {
+      $coreOptions[$relationshipType['id']] = E::ts('Role') . ": {$relationshipType['label_a_b']} / {$relationshipType['label_b_a']}";
+    }
+
+    $buildOptions += CRM_Casereminder_Util_Caseremindertype::filterOptionsByCaseOptions($coreOptions, $caseRoleValuesByTypeId);
+    return $buildOptions;
+  }
+
 }

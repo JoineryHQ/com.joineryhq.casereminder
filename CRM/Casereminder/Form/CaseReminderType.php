@@ -10,18 +10,6 @@ use Civi\Token\TokenProcessor;
  */
 class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
 
-  public static function getDowOptions() {
-    return [
-      'sunday' => E::ts('Sunday'),
-      'monday' => E::ts('Monday'),
-      'tuesday' => E::ts('Tuesday'),
-      'wednesday' => E::ts('Wednesday'),
-      'thursday' => E::ts('Thursday'),
-      'friday' => E::ts('Friday'),
-      'saturday' => E::ts('Saturday'),
-    ];
-  }
-
   /**
    * Explicitly declare the entity api name.
    */
@@ -57,10 +45,10 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
         'is_active' => NULL,
       ];
 
-      $caseStatusValuesByTypeId = $this->getCaseStatusValuesByTypeId();
+      $caseStatusValuesByTypeId = CRM_Casereminder_Util_Caseremindertype::getCaseStatusValuesByTypeId();
       $caseStatusOptions = $this->getCaseStatusOptions();
-      $caseRoleValuesByTypeId = $this->getCaseRoleValuesByTypeId();
-      $recipientOptions = $this->getRecipientOptions();
+      $caseRoleValuesByTypeId = CRM_Casereminder_Util_Caseremindertype::getCaseRoleValuesByTypeId();
+      $recipientOptions = array_flip(CRM_Casereminder_BAO_CaseReminderType::getRecipientOptions());
 
       $caseTypeOptions = CRM_Case_BAO_Case::buildOptions('case_type_id');
       $this->add(
@@ -143,7 +131,7 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
         TRUE
       );
 
-      $dowOptions = self::getDowOptions();
+      $dowOptions = CRM_Casereminder_BAO_CaseReminderType::getDowOptions();
 
       $this->add(
         // field type
@@ -262,115 +250,10 @@ class CRM_Casereminder_Form_CaseReminderType extends CRM_Admin_Form {
     return $elementNames;
   }
 
-  private function getCaseTypeDefinitions() {
-    static $ret;
-    if (!isset($ret)) {
-      $ret = [];
-      $caseTypeGet = _casereminder_civicrmapi('caseType', 'get', [
-        'sequential' => 1,
-        'return' => ["definition"],
-        'is_active' => TRUE,
-        'options' => ['limit' => 0],
-      ]);
-      foreach ($caseTypeGet['values'] as $value) {
-        $ret[$value['id']] = $value['definition'];
-      }
-    }
-    return $ret;
-  }
-
   private function getCaseStatusOptions() {
-    $caseStatusValuesByTypeId = $this->getCaseStatusValuesByTypeId();
-    $buildOptions = $this->filterOptionsByCaseOptions(CRM_Case_BAO_Case::buildOptions('case_status_id'), $caseStatusValuesByTypeId);
+    $caseStatusValuesByTypeId = CRM_Casereminder_Util_Caseremindertype::getCaseStatusValuesByTypeId();
+    $buildOptions = CRM_Casereminder_Util_Caseremindertype::filterOptionsByCaseOptions(CRM_Case_BAO_Case::buildOptions('case_status_id'), $caseStatusValuesByTypeId);
     return array_flip($buildOptions);
-  }
-
-  private function getCaseStatusValuesByTypeId() {
-    static $caseStatusValuesByTypeId;
-    if (!isset($caseStatusValuesByTypeId)) {
-      $caseStatusValuesByTypeId = [];
-
-      $caseStatusGet = $result = _casereminder_civicrmapi('OptionValue', 'get', [
-        'sequential' => 1,
-        'option_group_id' => "case_status",
-        'is_active' => TRUE,
-      ]);
-      $caseStatusesByName = CRM_Utils_Array::rekey($caseStatusGet['values'], 'name');
-
-      // A case type may have no specific statuses configured, which means it will
-      // use the default options: all available statuses.
-      $defaultStatuses = array_values(CRM_Utils_Array::collect('value', $caseStatusesByName));
-
-      $caseTypeDefinitions = $this->getCaseTypeDefinitions();
-      foreach ($caseTypeDefinitions as $caseTypeId => $caseTypeDefinition) {
-        $caseStatusValuesByTypeId[$caseTypeId] = [];
-        if (isset($caseTypeDefinition['statuses']) && is_array($caseTypeDefinition['statuses'])) {
-          // If this case type has statuses defined, use those.
-          foreach ($caseTypeDefinition['statuses'] as $statusName) {
-            $caseStatusValuesByTypeId[$caseTypeId][] = $caseStatusesByName[$statusName]['value'];
-          }
-        }
-        else {
-          // Otherwise, use the default options.
-          $caseStatusValuesByTypeId[$caseTypeId] = $defaultStatuses;
-        }
-      }
-    }
-    return $caseStatusValuesByTypeId;
-  }
-
-  private function getRecipientOptions() {
-    $caseRoleValuesByTypeId = $this->getCaseRoleValuesByTypeId();
-    $buildOptions = [
-      '-1' => E::ts('Case client'),
-    ];
-    $relationshipTypeGet = _casereminder_civicrmapi('relationshipType', 'get', [
-      'is_active' => 1,
-      'options' => [
-        'sort' => 'label_a_b ASC',
-        'limit' => 0,
-      ],
-    ]);
-    $coreOptions = [];
-    foreach ($relationshipTypeGet['values'] as $relationshipType) {
-      $coreOptions[$relationshipType['id']] = E::ts('Role') . ": {$relationshipType['label_a_b']} / {$relationshipType['label_b_a']}";
-    }
-
-    $buildOptions += $this->filterOptionsByCaseOptions($coreOptions, $caseRoleValuesByTypeId);
-    return array_flip($buildOptions);
-  }
-
-  private function getCaseRoleValuesByTypeId() {
-    static $caseRoleValuesByTypeId;
-    if (!isset($caseRoleValuesByTypeId)) {
-      $caseRoleValuesByTypeId = [];
-
-      $relationshipTypeGet = $result = _casereminder_civicrmapi('RelationshipType', 'get', [
-        'sequential' => 1,
-        'option_group_id' => "case_status",
-        'is_active' => TRUE,
-      ]);
-      $relationshipTypesByName = CRM_Utils_Array::rekey($relationshipTypeGet['values'], 'name_b_a');
-
-      $caseTypeDefinitions = $this->getCaseTypeDefinitions();
-      foreach ($caseTypeDefinitions as $caseTypeId => $caseTypeDefinition) {
-        // Start with -1 ("Case client"), which is a "fake" role that's valid for all case types.
-        $caseRoleValuesByTypeId[$caseTypeId] = ['-1'];
-        foreach ($caseTypeDefinition['caseRoles'] as $caseRole) {
-          $roleName = $caseRole['name'];
-          $caseRoleValuesByTypeId[$caseTypeId][] = $relationshipTypesByName[$roleName]['id'];
-        }
-      }
-    }
-    return $caseRoleValuesByTypeId;
-  }
-
-  private function filterOptionsByCaseOptions($options, $caseStatusValuesByTypeId) {
-    $caseValues = [];
-    foreach ($caseStatusValuesByTypeId as $values) {
-      $caseValues += array_intersect_key($options, array_flip($values));
-    }
-    return $caseValues;
   }
 
   /**

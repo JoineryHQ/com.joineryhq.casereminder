@@ -30,15 +30,15 @@
     <name>case_type_id</name>
     <type>int unsigned</type>
     <comment>FK to Case Type</comment>
+    <pseudoconstant>
+      <optionGroupName>case_type</optionGroupName>
+    </pseudoconstant>
   </field>
   <foreignKey>
     <name>case_type_id</name>
     <table>civicrm_case_type</table>
     <key>id</key>
     <onDelete>CASCADE</onDelete>
-    <pseudoconstant>
-      <optionGroupName>case_type</optionGroupName>
-    </pseudoconstant>
   </foreignKey>
 
   <field>
@@ -48,7 +48,7 @@
     <pseudoconstant>
       <optionGroupName>case_status</optionGroupName>
     </pseudoconstant>
-    <serialize>SEPARATOR_TRIMMED</serialize>
+    <serialize>SEPARATOR_BOOKEND</serialize>
     <comment>Case status ID(s), multi-value delimited. Implicit FK to civicrm_option_value where option_group = case_status.</comment>
   </field>
 
@@ -68,6 +68,10 @@
     <name>recipient_relationship_type_id</name>
     <type>varchar</type>
     <length>256</length>
+    <serialize>SEPARATOR_BOOKEND</serialize>
+    <pseudoconstant>
+      <callback>CRM_Casereminder_BAO_CaseReminderType::getRecipientOptions</callback>
+    </pseudoconstant>
     <comment>Relationship type ID(s) for recipients, multi-value delimited. Implicit FK to civicrm_relationship_type. -1 is Case Contact.</comment>
   </field>
 
@@ -90,7 +94,7 @@
     <type>varchar</type>
     <length>64</length>
     <pseudoconstant>
-      <callback>CRM_Casereminder_Form_CaseReminderType::getDowOptions</callback>
+      <callback>CRM_Casereminder_BAO_CaseReminderType::getDowOptions</callback>
     </pseudoconstant>
     <comment>Day of week to send reminders</comment>
   </field>
