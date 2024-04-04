@@ -1,0 +1,11 @@
+{
+    "type": "search",
+    "title": "Case Reminder Types",
+    "placement": [],
+    "icon": "fa-list-alt",
+    "server_route": "civicrm/admin/casereminder/types",
+    "permission": [
+        "access CiviCRM"
+    ],
+    "permission_operator": "AND"
+}
