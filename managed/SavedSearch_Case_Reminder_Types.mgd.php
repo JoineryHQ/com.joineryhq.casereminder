@@ -23,6 +23,7 @@ return [
             'subject',
             'dow:label',
             'is_active',
+            'recipient_relationship_type_id:label',
           ],
           'orderBy' => [],
           'where' => [],
@@ -100,6 +101,13 @@ return [
               'key' => 'case_status_id:label',
               'dataType' => 'String',
               'label' => E::ts('Case Statuses'),
+              'sortable' => TRUE,
+            ],
+            [
+              'type' => 'field',
+              'key' => 'recipient_relationship_type_id:label',
+              'dataType' => 'String',
+              'label' => E::ts('Recipients'),
               'sortable' => TRUE,
             ],
             [
