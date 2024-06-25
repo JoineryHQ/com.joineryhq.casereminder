@@ -55,7 +55,7 @@ function casereminder_civicrm_enable(): void {
 /**
  * Log CiviCRM API errors to CiviCRM log.
  */
-function _casereminder_log_api_error(CiviCRM_API3_Exception $e, $entity, $action, $contextMessage = NULL, $params) {
+function _casereminder_log_api_error(CiviCRM_API3_Exception $e, $entity, $action, $params, $contextMessage = NULL) {
   $message = "CiviCRM API Error '{$entity}.{$action}': " . $e->getMessage() . '; ';
   $message .= "API parameters when this error happened: " . json_encode($params) . '; ';
   $bt = debug_backtrace();
@@ -87,7 +87,7 @@ function _casereminder_civicrmapi($entity, $action, $params, $contextMessage = N
     $result = civicrm_api3($entity, $action, $params);
   }
   catch (CiviCRM_API3_Exception $e) {
-    _casereminder_log_api_error($e, $entity, $action, $contextMessage, $params);
+    _casereminder_log_api_error($e, $entity, $action, $params, $contextMessage);
     if (!$silence_errors) {
       throw $e;
     }
