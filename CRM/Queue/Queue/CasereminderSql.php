@@ -27,7 +27,7 @@ class CRM_Queue_Queue_CasereminderSql extends CRM_Queue_Queue_Sql {
 
   /**
    * Get the next item.
-   * 
+   *
    * This is identical to parent::claimItem, with one difference: We don't care
    * if queue items are processed in order; therefore, if a queue item has been
    * placed on hold, we'll just get the next one and keep proessing. (Parent
@@ -47,7 +47,7 @@ class CRM_Queue_Queue_CasereminderSql extends CRM_Queue_Queue_Sql {
     $sql = '
           SELECT id, queue_name, submit_time, release_time, run_count, data
           FROM civicrm_queue_item
-          WHERE queue_name = %1 
+          WHERE queue_name = %1
             AND (release_time IS NULL OR UNIX_TIMESTAMP(release_time) < %2)
           ORDER BY weight, id
           LIMIT 1

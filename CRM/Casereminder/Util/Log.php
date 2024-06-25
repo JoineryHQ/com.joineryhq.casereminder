@@ -5,11 +5,11 @@
  *
  */
 class CRM_Casereminder_Util_Log {
-  
+
   const ACTION_REMINDER_TYPE_BEGIN = 'BEGIN';
   const ACTION_REMINDER_TYPE_COMPLETE = 'COMPLETE';
   const ACTION_CASE_SEND = 'SEND';
-  
+
   public static function logReminderType ($caseReminderTypeId, $action) {
     $validActions = [
       self::ACTION_REMINDER_TYPE_BEGIN,
@@ -23,11 +23,12 @@ class CRM_Casereminder_Util_Log {
       'action' => $action,
     ]);
   }
-  
+
   /**
    * Log reminderType processing on a specific case.
-   * @param type $caseReminderTypeId
-   * @param type $action
+   * @param int $caseReminderTypeId ID for the relevant caseReminderType entity.
+   * @param string $action The type of action being logged.
+   * @param int $caseId ID for the relevant case entity.
    * @throws CRM_Extension_Exception
    */
   public static function logReminderCase ($caseReminderTypeId, $action, $caseId) {
@@ -43,4 +44,5 @@ class CRM_Casereminder_Util_Log {
       'action' => $action,
     ]);
   }
+
 }

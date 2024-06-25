@@ -1,5 +1,5 @@
 .crm-section.casereminder-element-case_status_id .content label::after,
 .crm-section.casereminder-element-recipient_relationship_type_id .content label::after {
-     content: "\A";
-     white-space: pre;
+  content: "\A";
+  white-space: pre;
 }

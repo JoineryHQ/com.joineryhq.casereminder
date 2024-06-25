@@ -58,13 +58,13 @@ class CRM_Casereminder_Util_Token {
       }
     }
   }
-  
+
   /**
    * Get values for the given tokenNames according to the current state token
    * environment (reference self::getTokenEnvCaseId)
-   *  
+   *
    * @param array $tokenNames Names of tokens to be populated
-   * 
+   *
    * @return array of token values, keyed to token names.
    */
   public static function getTokenValuesNow($tokenNames) {
@@ -139,8 +139,9 @@ class CRM_Casereminder_Util_Token {
   public static function setTokenEnvCaseId($value) {
     Civi::$statics[__CLASS__]['tokenEnvVars']['caseId'] = $value;
   }
-  
+
   public static function getTokenEnvCaseId() {
     return (Civi::$statics[__CLASS__]['tokenEnvVars']['caseId'] ?? NULL);
   }
+
 }

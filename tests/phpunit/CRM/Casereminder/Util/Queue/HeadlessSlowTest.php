@@ -96,6 +96,7 @@ class CRM_Casereminder_Util_Queue_HeadlessSlowTest extends \PHPUnit\Framework\Te
     $caseEndDate = $this->tomorrow->format('Y-m-d');
 
     // Create a message template
+    // phpcs:disable
     $msgTplParams = [
       'msg_title' => 'Case Reminder 2',
       'msg_subject' => $msgTplSubjectMarker,
@@ -116,6 +117,7 @@ class CRM_Casereminder_Util_Queue_HeadlessSlowTest extends \PHPUnit\Framework\Te
         Case ID: {CaseReminder_Case.id}|\r\n
       ",
     ];
+    // phpcs:enable
     $msgTpl = civicrm_api3('MessageTemplate', 'create', $msgTplParams);
     $this->assertTrue(is_int($msgTpl['id']), 'New message template has integer id.');
 

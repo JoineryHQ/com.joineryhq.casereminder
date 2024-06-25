@@ -104,7 +104,7 @@ class CRM_Casereminder_Util_Time {
    *
    * @param string $datetime
    */
-  public function reinitialize($datetime = "now") : void{
+  public function reinitialize($datetime = "now") : void {
     $this->errorIfAlterNotAllowed(__METHOD__);
     $this->initialize($datetime);
   }

@@ -21,7 +21,8 @@ trait CRM_CasereminderTestTrait {
     'creator_id' => NULL,
     'case_type_id' => 'housing_support',
     'subject' => "TESTING",
-    'status_id' => 1, // 'ongoing'
+    // status_id 1 = 'ongoing'
+    'status_id' => 1,
   ];
 
   protected function setupCasereminderTests() {
